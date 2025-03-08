@@ -12,13 +12,19 @@ type WorkerPool struct {
 }
 
 func NewWorkerPool(url, from, to, interval string, poolSize int) *WorkerPool {
-	return &WorkerPool{
+	instance := WorkerPool{
 		url:      url,
 		from:     from,
 		to:       to,
 		interval: interval,
 		input:    make(chan string),
 	}
+
+	for range poolSize {
+		go instance.startNewWorker()
+	}
+
+	return &instance
 }
 
 func (w *WorkerPool) Collect(metric string) {

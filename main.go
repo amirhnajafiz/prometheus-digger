@@ -2,8 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal"
@@ -16,46 +14,6 @@ var (
 	interval      string
 	metrics       []string
 )
-
-// load the vars from environment variables if not set
-func initVars() {
-	if prometheusUrl == "" {
-		prometheusUrl = os.Getenv("PD_PROMETHEUS_URL")
-		if prometheusUrl == "" {
-			prometheusUrl = "http://localhost:9090"
-		}
-	}
-
-	if len(metrics) == 0 {
-		metricsEnv := os.Getenv("PD_METRICS")
-		if metricsEnv == "" {
-			metrics = []string{"http_requests_total"}
-		} else {
-			metrics = strings.Split(metricsEnv, ",")
-		}
-	}
-
-	if from == "" {
-		from = os.Getenv("PD_FROM")
-		if from == "" {
-			from = "2023-01-01T00:00:00Z"
-		}
-	}
-
-	if to == "" {
-		to = os.Getenv("PD_TO")
-		if to == "" {
-			to = "2023-01-01T00:00:00Z"
-		}
-	}
-
-	if interval == "" {
-		interval = os.Getenv("PD_INTERVAL")
-		if interval == "" {
-			interval = "1m"
-		}
-	}
-}
 
 func main() {
 	// define flags for the vars
@@ -73,20 +31,11 @@ func main() {
 		metrics = strings.Split(*metricsFlag, ",")
 	}
 
-	// initialize variables
-	initVars()
+	// create a worker pool, one third of the number of metrics
+	pool := internal.NewWorkerPool(prometheusUrl, from, to, interval, len(metrics)/3)
 
 	// loop through the metrics and create a goroutine for each
 	for _, metric := range metrics {
-		go func(metric string) {
-			// create a new worker
-			resp, err := internal.Worker(prometheusUrl, metric, from, to, interval)
-			if err != nil {
-				panic(err)
-			}
-
-			// print the response
-			fmt.Println(resp)
-		}(metric)
+		pool.Collect(metric)
 	}
 }
