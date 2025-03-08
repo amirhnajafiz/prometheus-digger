@@ -7,7 +7,13 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/internal"
 )
 
+const (
+	// this const value is the number of workers per metrics, ex. 1 worker per 3 metric
+	poolSizeMetricsRatio = 3
+)
+
 var (
+	// program flags
 	prometheusUrl string
 	from          string
 	to            string
@@ -31,8 +37,14 @@ func main() {
 		metrics = strings.Split(*metricsFlag, ",")
 	}
 
-	// create a worker pool, one third of the number of metrics
-	pool := internal.NewWorkerPool(prometheusUrl, from, to, interval, len(metrics)/3)
+	// create a worker pool
+	pool := internal.NewWorkerPool(
+		prometheusUrl,
+		from,
+		to,
+		interval,
+		len(metrics)/poolSizeMetricsRatio,
+	)
 
 	// loop through the metrics and create a goroutine for each
 	for _, metric := range metrics {
