@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+const (
+	// outputDir is the directory where the JSON files will be stored.
+	outputDir = "output"
+)
+
 // WorkerPool is a module that creates workers to fetch metrics and export them in JSON files.
 type WorkerPool struct {
 	input chan string
@@ -90,9 +95,18 @@ func (w *WorkerPool) startNewWorker() {
 			continue
 		}
 
+		// check the output directory
+		if err := checkDir(outputDir + "/" + metric); err != nil {
+			log.Printf("[ERR] check output directory failed: %v\n", err)
+			w.wg.Done()
+			continue
+		}
+
+		// get the file name
+		fileName := w.getFileName(metric)
+
 		// store metrics in JSON file
-		err = storeMetricsInJsonFile(metric, w.from, w.to, resp)
-		if err != nil {
+		if err = writeFile(fileName, resp); err != nil {
 			log.Printf("[ERR] store metrics of %s failed: %v\n", metric, err)
 			w.wg.Done()
 			continue
@@ -101,4 +115,9 @@ func (w *WorkerPool) startNewWorker() {
 		log.Printf("[INFO] metrics of %s stored successfully\n", metric)
 		w.wg.Done()
 	}
+}
+
+// getFileName returns the file name for the given metric, from and to.
+func (w *WorkerPool) getFileName(metric string) string {
+	return outputDir + "/" + metric + "/" + w.from + "_" + w.to + ".json"
 }
