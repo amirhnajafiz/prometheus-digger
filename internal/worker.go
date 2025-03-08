@@ -1,35 +1,61 @@
 package internal
 
-// Worker fetches metrics from Prometheus.
+import "log"
+
+type WorkerPool struct {
+	input chan string
+
+	url      string
+	from     string
+	to       string
+	interval string
+}
+
+func NewWorkerPool(url, from, to, interval string, poolSize int) *WorkerPool {
+	return &WorkerPool{
+		url:      url,
+		from:     from,
+		to:       to,
+		interval: interval,
+		input:    make(chan string),
+	}
+}
+
+func (w *WorkerPool) Collect(metric string) {
+	w.input <- metric
+}
+
+// worker fetches metrics from Prometheus.
 // It takes the Prometheus URL, metric name, start time, end time, and interval as parameters.
-// It returns the response body as a string and an error if any.
-// It uses the newHttpGetRequest and fetchMetrics functions from the network package.
-// It sets the query parameters for the request and the headers for the request.
-// It returns the response body as a string and an error if any.
-func Worker(url, metric, from, to, interval string) (string, error) {
-	// create HTTP GET request
-	req, err := newHttpGetRequest(url)
-	if err != nil {
-		return "", err
+func (w *WorkerPool) startNewWorker() {
+	for {
+		// get metric from input channel
+		metric := <-w.input
+
+		// create HTTP GET request
+		req, err := newHttpGetRequest(w.url)
+		if err != nil {
+			log.Printf("[ERR] build HTTP request failed: %w\n", err)
+			continue
+		}
+
+		// set query parameters
+		q := req.URL.Query()
+		q.Add("query", metric)
+		q.Add("start", w.from)
+		q.Add("end", w.to)
+		q.Add("step", w.interval)
+		req.URL.RawQuery = q.Encode()
+
+		// set the headers
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+
+		// fetch metrics
+		_, err = fetchMetrics(req)
+		if err != nil {
+			log.Printf("[ERR] fetch metrics of %s failed: %v\n", metric, err)
+			continue
+		}
 	}
-
-	// set query parameters
-	q := req.URL.Query()
-	q.Add("query", metric)
-	q.Add("start", from)
-	q.Add("end", to)
-	q.Add("step", interval)
-	req.URL.RawQuery = q.Encode()
-
-	// set the headers
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	// fetch metrics
-	rsp, err := fetchMetrics(req)
-	if err != nil {
-		return "", err
-	}
-
-	return rsp, nil
 }
