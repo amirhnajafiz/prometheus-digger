@@ -1,8 +1,6 @@
 package internal
 
-import (
-	"os"
-)
+import "os"
 
 // checkDir checks if the input directory exists and creates it if it doesn't.
 func checkDir(dir string) error {

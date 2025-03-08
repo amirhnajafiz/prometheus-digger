@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
@@ -70,8 +71,7 @@ func (w *WorkerPool) startNewWorker() {
 		// create HTTP GET request
 		req, err := newHttpGetRequest(w.url)
 		if err != nil {
-			log.Printf("[ERR] build HTTP request failed: %v\n", err)
-			w.wg.Done()
+			w.throwError(fmt.Sprintf("build HTTP request for %s failed: %v", metric, err))
 			continue
 		}
 
@@ -90,29 +90,23 @@ func (w *WorkerPool) startNewWorker() {
 		// fetch metrics
 		resp, err := fetchMetrics(req)
 		if err != nil {
-			log.Printf("[ERR] fetch metrics of %s failed: %v\n", metric, err)
-			w.wg.Done()
+			w.throwError(fmt.Sprintf("fetch metrics of %s failed: %v", metric, err))
 			continue
 		}
 
 		// check the output directory
 		if err := checkDir(outputDir + "/" + metric); err != nil {
-			log.Printf("[ERR] check output directory failed: %v\n", err)
-			w.wg.Done()
+			w.throwError(fmt.Sprintf("check output directory of %s failed: %v", metric, err))
 			continue
 		}
-
-		// get the file name
-		fileName := w.getFileName(metric)
 
 		// store metrics in JSON file
-		if err = writeFile(fileName, resp); err != nil {
-			log.Printf("[ERR] store metrics of %s failed: %v\n", metric, err)
-			w.wg.Done()
+		if err = writeFile(w.getFileName(metric), resp); err != nil {
+			w.throwError(fmt.Sprintf("store metrics of %s failed: %v", metric, err))
 			continue
 		}
 
-		log.Printf("[INFO] metrics of %s stored successfully\n", metric)
+		log.Printf("[INFO] metrics of %s stored successfully.\n", metric)
 		w.wg.Done()
 	}
 }
@@ -120,4 +114,10 @@ func (w *WorkerPool) startNewWorker() {
 // getFileName returns the file name for the given metric, from and to.
 func (w *WorkerPool) getFileName(metric string) string {
 	return outputDir + "/" + metric + "/" + w.from + "_" + w.to + ".json"
+}
+
+// throwError logs an error message and marks the worker as done.
+func (w *WorkerPool) throwError(msg string) {
+	log.Printf("[ERR] %s\n", msg)
+	w.wg.Done()
 }
