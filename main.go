@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -72,4 +73,43 @@ func main() {
 
 	// initialize variables
 	initVars()
+
+	// create the http client
+	client := http.Client{}
+
+	// create the request
+	req, err := http.NewRequest("GET", prometheusUrl+"/api/v1/query_range", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	// set the query parameters
+	q := req.URL.Query()
+	q.Add("query", strings.Join(metrics, ","))
+	q.Add("start", from)
+	q.Add("end", to)
+	q.Add("step", interval)
+	req.URL.RawQuery = q.Encode()
+
+	// set the headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// make the request
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	// check the response status code
+	if resp.StatusCode != http.StatusOK {
+		panic("Error: " + resp.Status)
+	}
+
+	// print the response body
+	_, err = os.Stdout.ReadFrom(resp.Body)
+	if err != nil {
+		panic(err)
+	}
 }
