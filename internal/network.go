@@ -12,27 +12,27 @@ func newHttpGetRequest(url string) (*http.Request, error) {
 }
 
 // fetchMetrics sends the given HTTP request and returns the response body as a string.
-func fetchMetrics(req *http.Request) (string, error) {
+func fetchMetrics(req *http.Request) ([]byte, error) {
 	// create the http client
 	client := http.Client{}
 
 	// send the request
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// check the response status code
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("prometheus API response code: %d, %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("prometheus API response code: %d, %s", resp.StatusCode, string(body))
 	}
 
-	return string(body), nil
+	return body, nil
 }

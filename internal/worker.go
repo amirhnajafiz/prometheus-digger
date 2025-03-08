@@ -76,11 +76,22 @@ func (w *WorkerPool) startNewWorker() {
 		req.Header.Set("Accept", "application/json")
 
 		// fetch metrics
-		_, err = fetchMetrics(req)
+		resp, err := fetchMetrics(req)
 		if err != nil {
 			log.Printf("[ERR] fetch metrics of %s failed: %v\n", metric, err)
 			w.wg.Done()
 			continue
 		}
+
+		// store metrics in JSON file
+		err = storeMetricsInJsonFile(metric, w.from, w.to, resp)
+		if err != nil {
+			log.Printf("[ERR] store metrics of %s failed: %v\n", metric, err)
+			w.wg.Done()
+			continue
+		}
+
+		log.Printf("[INFO] metrics of %s stored successfully\n", metric)
+		w.wg.Done()
 	}
 }
