@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal"
 )
@@ -26,10 +27,10 @@ var (
 
 func main() {
 	// define flags for the vars
-	flag.StringVar(&prometheusUrl, "prometheus-url", "", "Prometheus URL")
-	flag.StringVar(&from, "from", "", "Start time for the query")
-	flag.StringVar(&to, "to", "", "End time for the query")
-	flag.StringVar(&interval, "interval", "", "Interval for the query")
+	flag.StringVar(&prometheusUrl, "prometheus-url", "http://127.0.0.1:9090", "Prometheus URL")
+	flag.StringVar(&from, "from", time.Now().String(), "Start time for the query")
+	flag.StringVar(&to, "to", time.Now().Add(1*time.Hour).String(), "End time for the query")
+	flag.StringVar(&interval, "interval", "1m", "Interval for the query")
 	metricsFlag := flag.String("metrics", "", "Metrics to query")
 
 	// parse the flags
