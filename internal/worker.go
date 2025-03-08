@@ -35,7 +35,7 @@ func (w *WorkerPool) startNewWorker() {
 		// create HTTP GET request
 		req, err := newHttpGetRequest(w.url)
 		if err != nil {
-			log.Printf("[ERR] build HTTP request failed: %w\n", err)
+			log.Printf("[ERR] build HTTP request failed: %v\n", err)
 			continue
 		}
 

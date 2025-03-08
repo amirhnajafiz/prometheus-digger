@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -22,15 +23,15 @@ func fetchMetrics(req *http.Request) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	// check the response status code
-	if resp.StatusCode != http.StatusOK {
-		return "", errHttpRequestFailed
-	}
-
 	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	}
+
+	// check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("prometheus API response code: %d, %s", resp.StatusCode, string(body))
 	}
 
 	return string(body), nil
