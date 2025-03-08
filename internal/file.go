@@ -31,6 +31,11 @@ func storeMetricsInJsonFile(
 	to string,
 	data []byte,
 ) error {
+	// check if the output directory exists
+	if err := checkDir(outputDir + "/" + metric); err != nil {
+		return err
+	}
+
 	// create a file name
 	fileName := getFileName(metric, from, to)
 
@@ -43,13 +48,11 @@ func storeMetricsInJsonFile(
 	return nil
 }
 
+// getFileName returns the file name for the given metric, from and to.
 func getFileName(
 	metric string,
 	from string,
 	to string,
 ) string {
-	// create a file name
-	fileName := outputDir + "/" + metric + "@" + from + "_" + to + ".json"
-
-	return fileName
+	return outputDir + "/" + metric + "/" + from + "_" + to + ".json"
 }
