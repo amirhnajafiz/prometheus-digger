@@ -12,7 +12,7 @@ func storeMetricsInJsonFile(
 	data []byte,
 ) error {
 	// create a file name
-	fileName := metric + "_" + from + "_" + to + ".json"
+	fileName := getFileName(metric, from, to)
 
 	// write data to file
 	err := os.WriteFile(fileName, data, 0644)
@@ -21,4 +21,15 @@ func storeMetricsInJsonFile(
 	}
 
 	return nil
+}
+
+func getFileName(
+	metric string,
+	from string,
+	to string,
+) string {
+	// create a file name
+	fileName := metric + "@" + from + "_" + to + ".json"
+
+	return fileName
 }

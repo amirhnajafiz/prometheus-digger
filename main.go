@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal"
@@ -10,6 +11,8 @@ import (
 const (
 	// this const value is the number of workers per metrics, ex. 1 worker per 3 metric
 	poolSizeMetricsRatio = 3
+	// this const value is the path of the prometheus API
+	promAPI = "/api/v1/query_range"
 )
 
 var (
@@ -41,7 +44,7 @@ func main() {
 	total := len(metrics)
 	poolSize := total/poolSizeMetricsRatio + 1
 	pool := internal.NewWorkerPool(
-		prometheusUrl,
+		fmt.Sprintf("%s%s", prometheusUrl, promAPI),
 		from,
 		to,
 		interval,
