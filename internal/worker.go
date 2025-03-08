@@ -28,6 +28,13 @@ func NewWorkerPool(url, from, to, interval string, poolSize, totalInput int) *Wo
 		wg:       &sync.WaitGroup{},
 	}
 
+	// check if the output directory exists
+	err := checkOutputDir()
+	if err != nil {
+		log.Printf("[ERR] check output directory failed: %v\n", err)
+		return nil
+	}
+
 	// start workers
 	for range poolSize {
 		go instance.startNewWorker()

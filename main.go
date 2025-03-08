@@ -51,6 +51,10 @@ func main() {
 		poolSize,
 		total,
 	)
+	if pool == nil {
+		fmt.Println("[ERR] failed to create worker pool!")
+		return
+	}
 
 	// loop through the metrics and create a goroutine for each
 	for _, metric := range metrics {
