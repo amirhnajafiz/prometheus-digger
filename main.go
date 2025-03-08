@@ -38,16 +38,21 @@ func main() {
 	}
 
 	// create a worker pool
+	total := len(metrics)
 	pool := internal.NewWorkerPool(
 		prometheusUrl,
 		from,
 		to,
 		interval,
-		len(metrics)/poolSizeMetricsRatio,
+		total/poolSizeMetricsRatio,
+		total,
 	)
 
 	// loop through the metrics and create a goroutine for each
 	for _, metric := range metrics {
 		pool.Collect(metric)
 	}
+
+	// wait for all workers
+	pool.StopAndWait()
 }

@@ -1,7 +1,11 @@
 package internal
 
-import "log"
+import (
+	"log"
+	"sync"
+)
 
+// WorkerPool is a module that creates workers to fetch metrics and export them in JSON files.
 type WorkerPool struct {
 	input chan string
 
@@ -9,30 +13,43 @@ type WorkerPool struct {
 	from     string
 	to       string
 	interval string
+
+	wg *sync.WaitGroup
 }
 
-func NewWorkerPool(url, from, to, interval string, poolSize int) *WorkerPool {
+// NewWorkerPool returns a WorkerPool instance.
+func NewWorkerPool(url, from, to, interval string, poolSize, totalInput int) *WorkerPool {
 	instance := WorkerPool{
 		url:      url,
 		from:     from,
 		to:       to,
 		interval: interval,
 		input:    make(chan string),
+		wg:       &sync.WaitGroup{},
 	}
 
+	// start workers
 	for range poolSize {
 		go instance.startNewWorker()
 	}
 
+	// set waitgroup
+	instance.wg.Add(totalInput)
+
 	return &instance
 }
 
+// Collect sends a metric to worker pool.
 func (w *WorkerPool) Collect(metric string) {
 	w.input <- metric
 }
 
-// worker fetches metrics from Prometheus.
-// It takes the Prometheus URL, metric name, start time, end time, and interval as parameters.
+// StopAndWait for all workers to finish.
+func (w *WorkerPool) StopAndWait() {
+	w.wg.Wait()
+}
+
+// startNewWorker creates a process that fetches metrics from Prometheus and stores them in JSON files.
 func (w *WorkerPool) startNewWorker() {
 	for {
 		// get metric from input channel
@@ -42,6 +59,7 @@ func (w *WorkerPool) startNewWorker() {
 		req, err := newHttpGetRequest(w.url)
 		if err != nil {
 			log.Printf("[ERR] build HTTP request failed: %v\n", err)
+			w.wg.Done()
 			continue
 		}
 
@@ -61,6 +79,7 @@ func (w *WorkerPool) startNewWorker() {
 		_, err = fetchMetrics(req)
 		if err != nil {
 			log.Printf("[ERR] fetch metrics of %s failed: %v\n", metric, err)
+			w.wg.Done()
 			continue
 		}
 	}
