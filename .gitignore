@@ -1,1 +1,31 @@
-__pycache__/
+# IDE
+.idea/
+*.iml
+*.swp
+.vscode/
+
+# OS
+.DS_Store
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.a
+*.o
+*.prof
+*.test.out
+*.test.prof
+*.test.out
+main
+
+# Go vendor
+vendor/
+
+# Go coverage
+*.cover
+*.coverprofile
