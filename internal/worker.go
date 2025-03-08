@@ -29,7 +29,7 @@ func NewWorkerPool(url, from, to, interval string, poolSize, totalInput int) *Wo
 	}
 
 	// check if the output directory exists
-	err := checkOutputDir()
+	err := checkDir(outputDir)
 	if err != nil {
 		log.Printf("[ERR] check output directory failed: %v\n", err)
 		return nil

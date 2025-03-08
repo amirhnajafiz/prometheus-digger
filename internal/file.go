@@ -5,16 +5,17 @@ import (
 )
 
 const (
+	// outputDir is the directory where the JSON files will be stored.
 	outputDir = "output"
 )
 
-// checkOutputDir checks if the output directory exists and creates it if it doesn't.
-func checkOutputDir() error {
-	// check if the output directory exists
-	_, err := os.Stat(outputDir)
+// checkDir checks if the input directory exists and creates it if it doesn't.
+func checkDir(input string) error {
+	// check if the input directory exists
+	_, err := os.Stat(input)
 	if os.IsNotExist(err) {
-		// create the output directory
-		err = os.Mkdir(outputDir, 0755)
+		// create the input directory
+		err = os.Mkdir(input, 0755)
 		if err != nil {
 			return err
 		}
