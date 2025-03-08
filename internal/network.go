@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"io"
 	"net/http"
 )
@@ -21,6 +22,11 @@ func fetchMetrics(req *http.Request) (string, error) {
 		return "", err
 	}
 	defer resp.Body.Close()
+
+	// check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New("Error: " + resp.Status)
+	}
 
 	// read the response body
 	body, err := io.ReadAll(resp.Body)
