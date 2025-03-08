@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"io"
 	"net/http"
 )
@@ -25,7 +24,7 @@ func fetchMetrics(req *http.Request) (string, error) {
 
 	// check the response status code
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New("Error: " + resp.Status)
+		return "", errHttpRequestFailed
 	}
 
 	// read the response body
