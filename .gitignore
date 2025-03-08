@@ -29,3 +29,6 @@ vendor/
 # Go coverage
 *.cover
 *.coverprofile
+
+# Custom
+run.sh

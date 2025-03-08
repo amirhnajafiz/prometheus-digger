@@ -39,12 +39,13 @@ func main() {
 
 	// create a worker pool
 	total := len(metrics)
+	poolSize := total/poolSizeMetricsRatio + 1
 	pool := internal.NewWorkerPool(
 		prometheusUrl,
 		from,
 		to,
 		interval,
-		total/poolSizeMetricsRatio,
+		poolSize,
 		total,
 	)
 
