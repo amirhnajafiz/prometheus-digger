@@ -71,7 +71,7 @@ func (w *WorkerPool) startNewWorker() {
 		metric := <-w.input
 
 		// create HTTP GET request
-		req, err := newHttpGetRequest(w.url)
+		req, err := pkg.NewHttpGetRequest(w.url)
 		if err != nil {
 			w.throwError(fmt.Sprintf("build HTTP request for %s failed: %v", metric, err))
 			continue
@@ -90,7 +90,7 @@ func (w *WorkerPool) startNewWorker() {
 		req.Header.Set("Accept", "application/json")
 
 		// fetch metrics
-		resp, err := fetchMetrics(req)
+		resp, err := pkg.FetchMetrics(req)
 		if err != nil {
 			w.throwError(fmt.Sprintf("fetch metrics of %s failed: %v", metric, err))
 			continue

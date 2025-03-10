@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal"
+	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
 const (
@@ -22,6 +23,7 @@ var (
 	from          string
 	to            string
 	interval      string
+	metricsFile   string
 	metrics       []string
 )
 
@@ -31,6 +33,7 @@ func main() {
 	flag.StringVar(&from, "from", time.Now().String(), "Start time for the query")
 	flag.StringVar(&to, "to", time.Now().Add(1*time.Hour).String(), "End time for the query")
 	flag.StringVar(&interval, "interval", "1m", "Interval for the query")
+	flag.StringVar(&metricsFile, "metrics-file", "", "Path to the metrics file")
 	metricsFlag := flag.String("metrics", "", "Metrics to query")
 
 	// parse the flags
@@ -39,6 +42,21 @@ func main() {
 	// split metrics flag if set
 	if *metricsFlag != "" {
 		metrics = strings.Split(*metricsFlag, ",")
+	}
+
+	// read metrics from file if set
+	if metricsFile != "" {
+		bytes, err := pkg.ReadFile(metricsFile)
+		if err != nil {
+			fmt.Println("[ERR] failed to read metrics file:", err)
+			return
+		}
+
+		jsons, err := internal.BytesToJSONs(bytes)
+		if err != nil {
+			fmt.Println("[ERR] failed to parse metrics file:", err)
+			return
+		}
 	}
 
 	// create a worker pool
