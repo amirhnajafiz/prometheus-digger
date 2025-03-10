@@ -8,11 +8,6 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
-const (
-	// outputDir is the directory where the JSON files will be stored.
-	outputDir = "output"
-)
-
 // WorkerPool is a module that creates workers to fetch metrics and export them in JSON files.
 type WorkerPool struct {
 	input chan string
