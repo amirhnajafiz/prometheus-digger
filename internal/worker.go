@@ -24,6 +24,9 @@ func NewWorkerPool() *WorkerPool {
 		return nil
 	}
 
+	// set the Prometheus API
+	cfg.URL = fmt.Sprintf("%s%s", cfg.URL, promAPI)
+
 	// create worker pool
 	instance := WorkerPool{
 		cfg:   cfg,

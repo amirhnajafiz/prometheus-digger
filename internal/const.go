@@ -6,4 +6,7 @@ const (
 
 	// configFile is the name of the configuration file.
 	configFile = "config.json"
+
+	// this const value is the path of the prometheus API
+	promAPI = "/api/v1/query_range"
 )
