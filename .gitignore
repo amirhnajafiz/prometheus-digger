@@ -33,3 +33,4 @@ vendor/
 # Custom
 run.sh
 output/
+*.csv
