@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
 const (
@@ -35,7 +37,7 @@ func NewWorkerPool(url, from, to, interval string, poolSize, totalInput int) *Wo
 	}
 
 	// check if the output directory exists
-	err := checkDir(outputDir)
+	err := pkg.CheckDir(outputDir)
 	if err != nil {
 		log.Printf("[ERR] check output directory failed: %v\n", err)
 		return nil
@@ -95,13 +97,13 @@ func (w *WorkerPool) startNewWorker() {
 		}
 
 		// check the output directory
-		if err := checkDir(outputDir + "/" + metric); err != nil {
+		if err := pkg.CheckDir(outputDir + "/" + metric); err != nil {
 			w.throwError(fmt.Sprintf("check output directory of %s failed: %v", metric, err))
 			continue
 		}
 
 		// store metrics in JSON file
-		if err = writeFile(w.getFileName(metric), resp); err != nil {
+		if err = pkg.WriteFile(w.getFileName(metric), resp); err != nil {
 			w.throwError(fmt.Sprintf("store metrics of %s failed: %v", metric, err))
 			continue
 		}
