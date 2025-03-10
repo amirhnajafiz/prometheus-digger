@@ -1,22 +1,25 @@
 package internal
 
-import "encoding/json"
+import (
+	"encoding/json"
 
-// The JSON array is expected to be in the format.
-type JSON struct {
-	Name  string `json:"name"`
-	Query string `json:"query"`
-}
+	"github.com/amirhnajafiz/prometheus-digger/pkg"
+)
 
-// BytesToJSONs converts a byte array to a JSON array
-// and returns an error if the conversion fails.
-func BytesToJSONs(bytes []byte) ([]JSON, error) {
-	var jsons []JSON
-
-	err := json.Unmarshal(bytes, &jsons)
+// loadConfigs reads the config file and returns a config instance.
+func loadConfigs(path string) (*config, error) {
+	// read config file
+	bytes, err := pkg.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return jsons, nil
+	// unmarshal config
+	var cfg config
+	err = json.Unmarshal(bytes, &cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
 }
