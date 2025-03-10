@@ -1,0 +1,24 @@
+{
+    "url": "http://127.0.0.1:9090",
+    "from": "2025-03-09T00:00:00Z",
+    "to": "2025-03-10T00:00:00Z",
+    "pool_size": 3,
+    "queries": [
+        {
+            "name": "GPU_TEMP",
+            "metric": "DCGM_FI_DEV_GPU_TEMP",
+            "interval": "1m"
+        },
+        {
+            "name": "GPU_POWER_USAGE",
+            "metric": "DCGM_FI_DEV_GPU_TEMP",
+            "interval": "1m"
+        },
+        {
+            "name": "MEMORY_USAGE",
+            "metric": "(node_memory_MemTotal_bytes{job=\"node-exporter\"}-node_memory_MemFree_bytes{job=\"node-exporter\"}-node_memory_Buffers_bytes{job=\"node-exporter\"}-node_memory_Cached_bytes{job=\"node-exporter\"})",
+            "interval": "1m"
+        }
+    ]
+}
+  
