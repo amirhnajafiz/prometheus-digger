@@ -8,6 +8,11 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/internal/worker"
 )
 
+const (
+	// configFile is the name of the configuration file.
+	configFile = "config.json"
+)
+
 func main() {
 	// load configs
 	cfg, err := config.LoadConfigs(configFile)
