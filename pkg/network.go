@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,8 +13,8 @@ func NewHttpGetRequest(url string) (*http.Request, error) {
 }
 
 // NewHttpPostRequest creates a new HTTP POST request with the given URL.
-func NewHttpPostRequest(url string) (*http.Request, error) {
-	return http.NewRequest("POST", url, nil)
+func NewHttpPostRequest(url string, body []byte) (*http.Request, error) {
+	return http.NewRequest("POST", url, bytes.NewBuffer(body))
 }
 
 // FetchMetrics sends the given HTTP request and returns the response body as a string.

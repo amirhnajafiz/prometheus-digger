@@ -14,8 +14,16 @@ func (w *WorkerPool) startNewWorker() {
 		// get metric from input channel
 		query := <-w.input
 
+		// set the callback function
+		var callback func(*config.Query) ([]byte, error)
+		if len(query.Metric) < 32 {
+			callback = w.followGET
+		} else {
+			callback = w.followPOST
+		}
+
 		// fetch metrics
-		resp, err := w.followGET(query)
+		resp, err := callback(query)
 		if err != nil {
 			w.throwError(fmt.Sprintf("fetch metrics of %s failed: %v", query.Name, err))
 			continue
@@ -40,6 +48,8 @@ func (w *WorkerPool) startNewWorker() {
 
 // followGET sends an HTTP GET request to the Prometheus server and returns the response body.
 func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
+	log.Printf("[INFO] metrics of %s are being pulled by GET\n", query.Name)
+
 	// create HTTP GET request
 	req, err := pkg.NewHttpGetRequest(w.cfg.URL)
 	if err != nil {
@@ -56,6 +66,33 @@ func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
 
 	// set the headers
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// fetch metrics
+	return pkg.FetchMetrics(req)
+}
+
+// followPOST sends an HTTP POST request to the Prometheus server and returns the response body.
+func (w *WorkerPool) followPOST(query *config.Query) ([]byte, error) {
+	log.Printf("[INFO] metrics of %s are being pulled by POST\n", query.Name)
+
+	// set the body
+	body := fmt.Sprintf(
+		"query=%s&start=%s&end=%s&step=%s",
+		query.Metric,
+		w.cfg.From,
+		w.cfg.To,
+		query.Interval,
+	)
+
+	// create HTTP POST request
+	req, err := pkg.NewHttpPostRequest(w.cfg.URL, []byte(body))
+	if err != nil {
+		return nil, fmt.Errorf("build HTTP request failed: %v", err)
+	}
+
+	// set the headers
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
 	// fetch metrics
