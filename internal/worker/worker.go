@@ -2,9 +2,9 @@ package worker
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/config"
+	"github.com/amirhnajafiz/prometheus-digger/internal/logger"
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
@@ -41,14 +41,14 @@ func (w *WorkerPool) startNewWorker() {
 			continue
 		}
 
-		log.Printf("[INFO] metrics of %s stored successfully.\n", query.Name)
+		logger.Info(fmt.Sprintf("metrics of %s stored successfully", query.Name))
 		w.wg.Done()
 	}
 }
 
 // followGET sends an HTTP GET request to the Prometheus server and returns the response body.
 func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
-	log.Printf("[INFO] metrics of %s are being pulled by GET\n", query.Name)
+	logger.Info(fmt.Sprintf("metrics of %s are being pulled by GET", query.Name))
 
 	// create HTTP GET request
 	req, err := pkg.NewHttpGetRequest(w.cfg.URL)
@@ -74,7 +74,7 @@ func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
 
 // followPOST sends an HTTP POST request to the Prometheus server and returns the response body.
 func (w *WorkerPool) followPOST(query *config.Query) ([]byte, error) {
-	log.Printf("[INFO] metrics of %s are being pulled by POST\n", query.Name)
+	logger.Info(fmt.Sprintf("metrics of %s are being pulled by POST", query.Name))
 
 	// set the body
 	body := fmt.Sprintf(
@@ -106,6 +106,6 @@ func (w *WorkerPool) getFileName(metric string) string {
 
 // throwError logs an error message and marks the worker as done.
 func (w *WorkerPool) throwError(msg string) {
-	log.Printf("[ERR] %s\n", msg)
+	logger.Error(msg)
 	w.wg.Done()
 }

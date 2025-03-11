@@ -2,10 +2,10 @@ package worker
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/config"
+	"github.com/amirhnajafiz/prometheus-digger/internal/logger"
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
@@ -30,7 +30,7 @@ func NewWorkerPool(cfg *config.Config) *WorkerPool {
 
 	// check if the output directory exists
 	if err := pkg.CheckDir(outputDir); err != nil {
-		log.Printf("[ERR] check output directory failed: %v\n", err)
+		logger.Error(fmt.Sprintf("check output directory failed: %v", err))
 		return nil
 	}
 
