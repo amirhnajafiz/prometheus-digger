@@ -1,4 +1,4 @@
-package internal
+package worker
 
 const (
 	// outputDir is the directory where the JSON files will be stored.

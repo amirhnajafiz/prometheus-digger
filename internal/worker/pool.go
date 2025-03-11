@@ -1,29 +1,23 @@
-package internal
+package worker
 
 import (
 	"fmt"
 	"log"
 	"sync"
 
+	"github.com/amirhnajafiz/prometheus-digger/internal/config"
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
 // WorkerPool is a module that creates workers to fetch metrics and export them in JSON files.
 type WorkerPool struct {
-	cfg   *config
+	cfg   *config.Config
 	wg    *sync.WaitGroup
-	input chan *query
+	input chan *config.Query
 }
 
 // NewWorkerPool returns a WorkerPool instance.
-func NewWorkerPool() *WorkerPool {
-	// load configs
-	cfg, err := loadConfigs(configFile)
-	if err != nil {
-		log.Printf("[ERR] load configs failed: %v\n", err)
-		return nil
-	}
-
+func NewWorkerPool(cfg *config.Config) *WorkerPool {
 	// set the Prometheus API
 	cfg.URL = fmt.Sprintf("%s%s", cfg.URL, promAPI)
 
