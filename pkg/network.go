@@ -11,6 +11,11 @@ func NewHttpGetRequest(url string) (*http.Request, error) {
 	return http.NewRequest("GET", url, nil)
 }
 
+// NewHttpPostRequest creates a new HTTP POST request with the given URL.
+func NewHttpPostRequest(url string) (*http.Request, error) {
+	return http.NewRequest("POST", url, nil)
+}
+
 // FetchMetrics sends the given HTTP request and returns the response body as a string.
 func FetchMetrics(req *http.Request) ([]byte, error) {
 	// create the http client

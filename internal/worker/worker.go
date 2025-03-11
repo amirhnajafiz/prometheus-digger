@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/amirhnajafiz/prometheus-digger/internal/config"
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
@@ -13,27 +14,8 @@ func (w *WorkerPool) startNewWorker() {
 		// get metric from input channel
 		query := <-w.input
 
-		// create HTTP GET request
-		req, err := pkg.NewHttpGetRequest(w.cfg.URL)
-		if err != nil {
-			w.throwError(fmt.Sprintf("build HTTP request for %s failed: %v", query.Name, err))
-			continue
-		}
-
-		// set query parameters
-		q := req.URL.Query()
-		q.Add("query", query.Metric)
-		q.Add("start", w.cfg.From)
-		q.Add("end", w.cfg.To)
-		q.Add("step", query.Interval)
-		req.URL.RawQuery = q.Encode()
-
-		// set the headers
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Accept", "application/json")
-
 		// fetch metrics
-		resp, err := pkg.FetchMetrics(req)
+		resp, err := w.followGET(query)
 		if err != nil {
 			w.throwError(fmt.Sprintf("fetch metrics of %s failed: %v", query.Name, err))
 			continue
@@ -54,6 +36,30 @@ func (w *WorkerPool) startNewWorker() {
 		log.Printf("[INFO] metrics of %s stored successfully.\n", query.Name)
 		w.wg.Done()
 	}
+}
+
+// followGET sends an HTTP GET request to the Prometheus server and returns the response body.
+func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
+	// create HTTP GET request
+	req, err := pkg.NewHttpGetRequest(w.cfg.URL)
+	if err != nil {
+		return nil, fmt.Errorf("build HTTP request failed: %v", err)
+	}
+
+	// set query parameters
+	q := req.URL.Query()
+	q.Add("query", query.Metric)
+	q.Add("start", w.cfg.From)
+	q.Add("end", w.cfg.To)
+	q.Add("step", query.Interval)
+	req.URL.RawQuery = q.Encode()
+
+	// set the headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	// fetch metrics
+	return pkg.FetchMetrics(req)
 }
 
 // getFileName returns the file name for the given metric, from and to.
