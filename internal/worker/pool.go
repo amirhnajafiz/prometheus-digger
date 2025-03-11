@@ -24,7 +24,7 @@ func NewWorkerPool(cfg *config.Config) *WorkerPool {
 	// create worker pool
 	instance := WorkerPool{
 		cfg:   cfg,
-		input: make(chan *query),
+		input: make(chan *config.Query),
 		wg:    &sync.WaitGroup{},
 	}
 
