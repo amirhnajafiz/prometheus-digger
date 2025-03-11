@@ -1,16 +1,16 @@
-package internal
+package config
 
-// config is a module that holds the configuration of the application.
-type config struct {
+// Config is a module that holds the configuration of the application.
+type Config struct {
 	URL      string  `json:"url"`
 	From     string  `json:"from"`
 	To       string  `json:"to"`
 	PoolSize int     `json:"pool_size"`
-	Queries  []query `json:"queries"`
+	Queries  []Query `json:"queries"`
 }
 
-// query is a module that holds the query information.
-type query struct {
+// Query is a module that holds the query information.
+type Query struct {
 	Name     string `json:"name"`
 	Metric   string `json:"metric"`
 	Interval string `json:"interval"`

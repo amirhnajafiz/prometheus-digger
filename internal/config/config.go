@@ -1,4 +1,4 @@
-package internal
+package config
 
 import (
 	"encoding/json"
@@ -6,8 +6,8 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
-// loadConfigs reads the config file and returns a config instance.
-func loadConfigs(path string) (*config, error) {
+// LoadConfigs reads the config file and returns a config instance.
+func LoadConfigs(path string) (*Config, error) {
 	// read config file
 	bytes, err := pkg.ReadFile(path)
 	if err != nil {
@@ -15,7 +15,7 @@ func loadConfigs(path string) (*config, error) {
 	}
 
 	// unmarshal config
-	var cfg config
+	var cfg Config
 	err = json.Unmarshal(bytes, &cfg)
 	if err != nil {
 		return nil, err
