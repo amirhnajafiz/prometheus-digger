@@ -7,6 +7,7 @@ Prometheus Digger is a tool designed to help you extract and analyze metrics fro
 - Extract metrics/queries from a Prometheus server
 - Specify custom time ranges
 - Define intervals for metric retrieval
+- Adaptive pulling method based on the given query
 
 ## Usage
 
