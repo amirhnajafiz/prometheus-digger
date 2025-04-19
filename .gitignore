@@ -35,4 +35,4 @@ run.sh
 output/
 *.csv
 config.json
-compute.json
+config*.json
