@@ -59,9 +59,9 @@ func main() {
 	cfg := initCfg(*configFilePath)
 
 	// print the configuration
-	fmt.Printf("Configuration loaded:\n\tFrom: %s\n\tTo: %s\n", cfg.From, cfg.To)
-	fmt.Printf("\tTarget: %s\n\n", cfg.URL)
-	fmt.Printf("\tNumber of queries: %d\n", len(cfg.Queries))
+	fmt.Printf("Configuration loaded:\n\tMetrics From: %s\n\tTo: %s\n", cfg.From, cfg.To)
+	fmt.Printf("\tTarget: %s\n", cfg.URL)
+	fmt.Printf("\tNumber of queries: %d\n\n", len(cfg.Queries))
 
 	// create worker pool
 	pool := worker.NewWorkerPool(cfg)
