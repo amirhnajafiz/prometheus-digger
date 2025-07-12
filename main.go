@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/config"
+	"github.com/amirhnajafiz/prometheus-digger/internal/parser"
 	"github.com/amirhnajafiz/prometheus-digger/internal/worker"
 )
 
@@ -21,6 +23,11 @@ func main() {
 		log.Printf("[ERR] load configs failed: %v\n", err)
 		return
 	}
+
+	// parse the configuration dates
+	startTime := time.Now()
+	cfg.From = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.From))
+	cfg.To = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.To))
 
 	// create worker pool
 	pool := worker.NewWorkerPool(cfg)
