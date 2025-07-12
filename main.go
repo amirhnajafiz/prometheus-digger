@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -8,14 +9,14 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/internal/worker"
 )
 
-const (
-	// configFile is the name of the configuration file.
-	configFile = "config.json"
-)
-
 func main() {
+	// register the flags
+	var (
+		configFilePath = flag.String("config", "config.json", "Path to the configuration file")
+	)
+
 	// load configs
-	cfg, err := config.LoadConfigs(configFile)
+	cfg, err := config.LoadConfigs(*configFilePath)
 	if err != nil {
 		log.Printf("[ERR] load configs failed: %v\n", err)
 		return
