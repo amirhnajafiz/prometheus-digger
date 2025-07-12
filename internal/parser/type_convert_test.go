@@ -32,3 +32,37 @@ func TestConvertToString(t *testing.T) {
 		})
 	}
 }
+
+// TestConvertToTime tests the ConvertToTime function.
+func TestConvertToTime(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   string
+		want    time.Time
+		wantErr bool
+	}{
+		{
+			name:  "Valid Time",
+			input: "2025-03-10T00:00:00Z",
+			want:  time.Date(2025, 3, 10, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:    "Invalid Time Format",
+			input:   "2025-03-10T00:00:00",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ConvertToTime(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ConvertToTime() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && !got.Equal(tt.want) {
+				t.Errorf("ConvertToTime() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
