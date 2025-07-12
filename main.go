@@ -45,6 +45,10 @@ func main() {
 	cfg.From = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.From))
 	cfg.To = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.To))
 
+	// print the configuration
+	fmt.Printf("Configuration loaded:\nFrom: %s\nTo: %s\n", cfg.From, cfg.To)
+	fmt.Printf("Target: %s\n", cfg.URL)
+
 	// create worker pool
 	pool := worker.NewWorkerPool(cfg)
 	if pool == nil {
