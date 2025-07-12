@@ -6,7 +6,7 @@ import (
 )
 
 // ConvertSliceToTime gets a base time and an input parameters with
-// this signature: +/-dd:hh:mm:ss
+// this signature: +/- dd:hh:mm:ss
 // Then it returns the base time adjusted by the input parameters.
 func ConvertSliceToTime(base time.Time, slice string) time.Time {
 	// parse the input slice
@@ -14,10 +14,11 @@ func ConvertSliceToTime(base time.Time, slice string) time.Time {
 	if slice[0] == '-' {
 		sign = -1
 		slice = slice[1:]
-	}
-	if slice[0] == '+' {
+	} else if slice[0] == '+' {
 		sign = 1
 		slice = slice[1:]
+	} else {
+		sign = 1
 	}
 
 	// ensure the slice is in the correct format
@@ -28,10 +29,21 @@ func ConvertSliceToTime(base time.Time, slice string) time.Time {
 	}
 
 	// calculate the total duration
-	duration := time.Duration(sign) * (time.Hour*24*time.Duration(days) +
-		time.Hour*time.Duration(hours) +
-		time.Minute*time.Duration(minutes) +
-		time.Second*time.Duration(seconds))
+	var duration time.Duration
+	if days > 0 {
+		duration += time.Hour * 24 * time.Duration(days)
+	}
+	if hours > 0 {
+		duration += time.Hour * time.Duration(hours)
+	}
+	if minutes > 0 {
+		duration += time.Minute * time.Duration(minutes)
+	}
+	if seconds > 0 {
+		duration += time.Second * time.Duration(seconds)
+	}
+
+	duration = time.Duration(sign) * duration
 
 	return base.Add(duration)
 }
