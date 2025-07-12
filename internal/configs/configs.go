@@ -9,11 +9,10 @@ import (
 
 // Config is a module that holds the configuration of the application.
 type Config struct {
-	URL      string         `json:"url"`
-	From     string         `json:"from"`
-	To       string         `json:"to"`
-	PoolSize int            `json:"pool_size"`
-	Queries  []models.Query `json:"queries"`
+	URL     string         `json:"url"`
+	From    string         `json:"from"`
+	To      string         `json:"to"`
+	Queries []models.Query `json:"queries"`
 }
 
 // LoadConfigs reads the config file and returns a config instance.

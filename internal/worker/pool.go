@@ -39,7 +39,8 @@ func NewWorkerPool(cfg *configs.Config) *WorkerPool {
 	}
 
 	// start workers
-	for range cfg.PoolSize {
+	poolSize := min(len(cfg.Queries)/3, 1)
+	for range poolSize {
 		go instance.startNewWorker()
 	}
 

@@ -2,7 +2,6 @@
     "url": "http://127.0.0.1:9090",
     "from": "-2:00:00:00",
     "to": "0:00:00:00",
-    "pool_size": 3,
     "queries": [
         {
             "name": "GPU_TEMP",
