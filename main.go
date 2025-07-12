@@ -18,6 +18,28 @@ func help() {
 	fmt.Println("  -help            Show this help message")
 }
 
+func initCfg(path string) *configs.Config {
+	// load configs
+	cfg, err := configs.LoadConfigs(path)
+	if err != nil {
+		log.Fatalf("[ERR] load configs failed: %v\n", err)
+	}
+
+	// parse the configuration dates
+	var startTime time.Time
+	if cfg.From == "" {
+		startTime = time.Now()
+		cfg.From = parser.ConvertToString(startTime)
+	} else {
+		startTime, _ = parser.ConvertToTime(cfg.From)
+	}
+
+	cfg.To = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.To))
+	cfg.From, cfg.To = parser.SortDates(cfg.From, cfg.To)
+
+	return cfg
+}
+
 func main() {
 	// register the flags
 	var (
@@ -33,33 +55,18 @@ func main() {
 		return
 	}
 
-	// load configs
-	cfg, err := configs.LoadConfigs(*configFilePath)
-	if err != nil {
-		log.Printf("[ERR] load configs failed: %v\n", err)
-		return
-	}
-
-	// parse the configuration dates
-	var startTime time.Time
-	if cfg.From == "" {
-		startTime = time.Now()
-		cfg.From = parser.ConvertToString(startTime)
-	} else {
-		startTime, _ = parser.ConvertToTime(cfg.From)
-	}
-
-	cfg.To = parser.ConvertToString(parser.ConvertSliceToTime(startTime, cfg.To))
-	cfg.From, cfg.To = parser.SortDates(cfg.From, cfg.To)
+	// initialize the configuration
+	cfg := initCfg(*configFilePath)
 
 	// print the configuration
-	fmt.Printf("Configuration loaded:\nFrom: %s\nTo: %s\n", cfg.From, cfg.To)
-	fmt.Printf("Target: %s\n", cfg.URL)
+	fmt.Printf("Configuration loaded:\n\tFrom: %s\n\tTo: %s\n", cfg.From, cfg.To)
+	fmt.Printf("\tTarget: %s\n\n", cfg.URL)
+	fmt.Printf("\tNumber of queries: %d\n", len(cfg.Queries))
 
 	// create worker pool
 	pool := worker.NewWorkerPool(cfg)
 	if pool == nil {
-		fmt.Println("[ERR] failed to create worker pool!")
+		log.Fatalln("[ERR] failed to create worker pool!")
 		return
 	}
 

@@ -10,12 +10,15 @@ import (
 // in a different color.
 func colorize(msg string) string {
 	colors := []string{
-		"\033[31m", // Red
-		"\033[32m", // Green
-		"\033[33m", // Yellow
-		"\033[34m", // Blue
-		"\033[35m", // Magenta
-		"\033[36m", // Cyan
+		"\033[31m", // red
+		"\033[32m", // green
+		"\033[33m", // yellow
+		"\033[34m", // blue
+		"\033[35m", // magenta
+		"\033[36m", // cyan
+		"\033[90m", // bright black
+		"\033[91m", // bright red
+		"\033[92m", // bright green
 	}
 	reset := "\033[0m"
 
