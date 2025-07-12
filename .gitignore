@@ -34,5 +34,3 @@ vendor/
 run.sh
 output/
 *.csv
-config.json
-config*.json
