@@ -3,8 +3,8 @@ package worker
 import (
 	"fmt"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/config"
 	"github.com/amirhnajafiz/prometheus-digger/internal/logger"
+	"github.com/amirhnajafiz/prometheus-digger/internal/models"
 	"github.com/amirhnajafiz/prometheus-digger/pkg"
 )
 
@@ -15,7 +15,7 @@ func (w *WorkerPool) startNewWorker() {
 		query := <-w.input
 
 		// set the callback function
-		var callback func(*config.Query) ([]byte, error)
+		var callback func(*models.Query) ([]byte, error)
 		if len(query.Metric) < 32 {
 			callback = w.followGET
 		} else {
@@ -47,11 +47,11 @@ func (w *WorkerPool) startNewWorker() {
 }
 
 // followGET sends an HTTP GET request to the Prometheus server and returns the response body.
-func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
+func (w *WorkerPool) followGET(query *models.Query) ([]byte, error) {
 	logger.Info(fmt.Sprintf("metrics of %s are being pulled by GET", query.Name))
 
 	// create HTTP GET request
-	req, err := pkg.NewHttpGetRequest(w.cfg.URL)
+	req, err := pkg.NewHttpGetRequest(w.url)
 	if err != nil {
 		return nil, fmt.Errorf("build HTTP request failed: %v", err)
 	}
@@ -59,8 +59,8 @@ func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
 	// set query parameters
 	q := req.URL.Query()
 	q.Add("query", query.Metric)
-	q.Add("start", w.cfg.From)
-	q.Add("end", w.cfg.To)
+	q.Add("start", w.from)
+	q.Add("end", w.to)
 	q.Add("step", query.Interval)
 	req.URL.RawQuery = q.Encode()
 
@@ -73,20 +73,20 @@ func (w *WorkerPool) followGET(query *config.Query) ([]byte, error) {
 }
 
 // followPOST sends an HTTP POST request to the Prometheus server and returns the response body.
-func (w *WorkerPool) followPOST(query *config.Query) ([]byte, error) {
+func (w *WorkerPool) followPOST(query *models.Query) ([]byte, error) {
 	logger.Info(fmt.Sprintf("metrics of %s are being pulled by POST", query.Name))
 
 	// set the body
 	body := fmt.Sprintf(
 		"query=%s&start=%s&end=%s&step=%s",
 		query.Metric,
-		w.cfg.From,
-		w.cfg.To,
+		w.from,
+		w.to,
 		query.Interval,
 	)
 
 	// create HTTP POST request
-	req, err := pkg.NewHttpPostRequest(w.cfg.URL, []byte(body))
+	req, err := pkg.NewHttpPostRequest(w.url, []byte(body))
 	if err != nil {
 		return nil, fmt.Errorf("build HTTP request failed: %v", err)
 	}
@@ -101,7 +101,7 @@ func (w *WorkerPool) followPOST(query *config.Query) ([]byte, error) {
 
 // getFileName returns the file name for the given metric, from and to.
 func (w *WorkerPool) getFileName(metric string) string {
-	return outputDir + "/" + metric + "/" + w.cfg.From + "_" + w.cfg.To + ".json"
+	return outputDir + "/" + metric + "/" + w.from + "_" + w.to + ".json"
 }
 
 // throwError logs an error message and marks the worker as done.

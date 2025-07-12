@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/config"
+	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
 	"github.com/amirhnajafiz/prometheus-digger/internal/parser"
 	"github.com/amirhnajafiz/prometheus-digger/internal/worker"
 )
@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// load configs
-	cfg, err := config.LoadConfigs(*configFilePath)
+	cfg, err := configs.LoadConfigs(*configFilePath)
 	if err != nil {
 		log.Printf("[ERR] load configs failed: %v\n", err)
 		return
