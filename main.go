@@ -17,6 +17,8 @@ func main() {
 		configFilePath = flag.String("config", "config.json", "Path to the configuration file")
 	)
 
+	flag.Parse()
+
 	// load configs
 	cfg, err := config.LoadConfigs(*configFilePath)
 	if err != nil {
