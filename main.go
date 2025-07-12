@@ -11,13 +11,27 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/internal/worker"
 )
 
+func help() {
+	fmt.Println("Usage: prometheus-digger [options]")
+	fmt.Println("Options:")
+	fmt.Println("  -config string   Path to the configuration file (default \"config.json\")")
+	fmt.Println("  -help            Show this help message")
+}
+
 func main() {
 	// register the flags
 	var (
 		configFilePath = flag.String("config", "config.json", "Path to the configuration file")
+		helpFlag       = flag.Bool("help", false, "Show help message")
 	)
 
 	flag.Parse()
+
+	// check if help is requested
+	if *helpFlag {
+		help()
+		return
+	}
 
 	// load configs
 	cfg, err := config.LoadConfigs(*configFilePath)
