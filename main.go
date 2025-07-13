@@ -75,4 +75,7 @@ func main() {
 
 	// wait for all workers
 	pool.StopAndWait()
+
+	// print the summary
+	pool.PrintStats()
 }

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/logger"
 	"github.com/amirhnajafiz/prometheus-digger/internal/models"
@@ -22,12 +23,16 @@ func (w *WorkerPool) startNewWorker() {
 			callback = w.followPOST
 		}
 
+		start := time.Now()
+
 		// fetch metrics
 		resp, err := callback(query)
 		if err != nil {
 			w.throwError(fmt.Sprintf("fetch metrics of %s failed: %v", query.Name, err))
 			continue
 		}
+
+		w.latencies = append(w.latencies, float64(time.Since(start).Milliseconds()))
 
 		// check the output directory
 		if err := pkg.CheckDir(outputDir + "/" + query.Name); err != nil {
