@@ -31,8 +31,8 @@ chmod +x ./pdigger
 Copy the example config file from `config/config.example.json` into `config.json`. You the following fields:
 
 - `url`: The URL of the Prometheus server. (default is http://localhost:9090)
-- `from`: The start time for metrics. (e.g -2:12:00:00 is 2 days and 12 hours ago from now)
-- `to`: The end time for metrics. (e.g -1:12:00:00 is 1 day and 12 hours ago from now)
+- `from`: The date-time of the start metrics. (e.g. 2025-07-11T00:00:00Z)
+- `to`: The end time for metrics. (e.g. -1:12:00:00 is 1 day and 12 hours ago from now)
 - `queries`: A list of metrics and queries to dig
     - `queries.interval`: The interval at which to retrieve metrics. ("1m", "1h", "30s")
     - `queries.name`: The output directory of the query, also a label for logs and debugging.
@@ -45,7 +45,7 @@ Here is an example command to retrieve power usage metrics from a Prometheus ser
 ```sh
 {
     "url": "http://127.0.0.1:9090",
-    "from": "-1:12:00:00",
+    "from": "2025-07-11T00:00:00Z",
     "to": "+2:12:00:00",
     "queries": [
         {
@@ -57,4 +57,4 @@ Here is an example command to retrieve power usage metrics from a Prometheus ser
 }
 ```
 
-This command will retrieve the `DCGM_FI_DEV_POWER_USAGE` metric from the Prometheus server at `http://127.0.0.1:9090` for the time range from 1 and half day ago to 2 and half days in future, with a 1-minute interval.
+This command will retrieve the `DCGM_FI_DEV_POWER_USAGE` metric from the Prometheus server at `http://127.0.0.1:9090` for the time range from 2025-07-11 until 2 days and 12 hours after that, with a 1-minute interval.
