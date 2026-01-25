@@ -1,4 +1,4 @@
-package pkg
+package networking
 
 import (
 	"bytes"
@@ -17,8 +17,8 @@ func NewHttpPostRequest(url string, body []byte) (*http.Request, error) {
 	return http.NewRequest("POST", url, bytes.NewBuffer(body))
 }
 
-// FetchMetrics sends the given HTTP request and returns the response body as a string.
-func FetchMetrics(req *http.Request) ([]byte, error) {
+// HTTPSend sends the given HTTP request and returns the response body.
+func HTTPSend(req *http.Request) ([]byte, error) {
 	// create the http client
 	client := http.Client{}
 
@@ -37,7 +37,7 @@ func FetchMetrics(req *http.Request) ([]byte, error) {
 
 	// check the response status code
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("prometheus API response code: %d, %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("failed HTTP: [`%d`] %s", resp.StatusCode, string(body))
 	}
 
 	return body, nil

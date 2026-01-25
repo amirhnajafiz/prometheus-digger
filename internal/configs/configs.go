@@ -2,32 +2,32 @@ package configs
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/models"
-	"github.com/amirhnajafiz/prometheus-digger/pkg"
+	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
-// Config is a module that holds the configuration of the application.
+// Config holds the configuration of the the digger.
 type Config struct {
-	URL     string         `json:"url"`
-	From    string         `json:"from"`
-	To      string         `json:"to"`
-	Queries []models.Query `json:"queries"`
+	RequestTimeout int    `json:"request_timeout"`
+	DataDir        string `json:"data_directory"`
+	PrometheusURL  string `json:"prometheus_url"`
+	Steps          string `json:"steps"`
 }
 
-// LoadConfigs reads the config file and returns a config instance.
+// LoadConfigs reads a json format config file and returns a config instance.
 func LoadConfigs(path string) (*Config, error) {
 	// read config file
-	bytes, err := pkg.ReadFile(path)
+	bytes, err := files.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read config file `%s`: %v", path, err)
 	}
 
-	// unmarshal config
-	var cfg Config
+	// unmarshal configs into an instance
+	cfg := Default()
 	err = json.Unmarshal(bytes, &cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal config file `%s`: %v", path, err)
 	}
 
 	return &cfg, nil
