@@ -14,7 +14,7 @@ type Digger struct {
 	Timeout int
 	Metric  string
 	URL     string
-	Steps   time.Duration
+	Step    time.Duration
 	From    time.Time
 	To      time.Time
 }
@@ -38,7 +38,7 @@ func NewDigger(
 	if err != nil {
 		return nil, fmt.Errorf("invalid duration for steps `%s`: %v", cfg.Steps, err)
 	}
-	instance.Steps = du
+	instance.Step = du
 
 	// convert from and to into time.Time
 	fd, err := time.Parse(time.RFC3339, from)
@@ -61,35 +61,50 @@ func (d *Digger) Dig() error {
 	var (
 		err      error
 		response []byte
+		tranges  []time.Time
 	)
 
-	// make sure to send long requests as GET
-	if len(d.Metric) < 1024 {
-		response, err = client.FetchMetricByGET(
-			d.URL,
-			d.Metric,
-			d.Steps.String(),
-			d.From,
-			d.To,
-		)
+	// get expected datapoints
+	dp := client.GetDataPoints(d.From, d.To, d.Step)
+	if dp > 1000 {
+		tranges = client.SplitTimeRange(d.From, d.To, d.Step, dp)
 	} else {
-		response, err = client.FetchMetricByPOST(
-			d.URL,
-			d.Metric,
-			d.Steps.String(),
-			d.From,
-			d.To,
-		)
+		tranges = []time.Time{d.From, d.To}
 	}
 
-	// check for errors
-	if err != nil {
-		return fmt.Errorf("failed to fetch metrics: %v", err)
-	}
+	// loop over time ranges and submit the requests
+	for i := 0; i < len(tranges)-1; i++ {
+		from := tranges[i]
+		to := tranges[i+1]
 
-	// write the output to JSON file
-	if err := files.WriteFile("out", response); err != nil {
-		return fmt.Errorf("failed to save metrics: %v", err)
+		// make sure to send long requests as GET
+		if len(d.Metric) < 1024 {
+			response, err = client.FetchMetricByGET(
+				d.URL,
+				d.Metric,
+				d.Step.String(),
+				from,
+				to,
+			)
+		} else {
+			response, err = client.FetchMetricByPOST(
+				d.URL,
+				d.Metric,
+				d.Step.String(),
+				from,
+				to,
+			)
+		}
+
+		// check for errors
+		if err != nil {
+			return fmt.Errorf("failed to fetch metrics: %v", err)
+		}
+
+		// write the output to JSON file
+		if err := files.WriteFile("out", response); err != nil {
+			return fmt.Errorf("failed to save metrics: %v", err)
+		}
 	}
 
 	return nil
