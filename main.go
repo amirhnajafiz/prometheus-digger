@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 
+	"github.com/amirhnajafiz/prometheus-digger/internal/cmd"
 	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
 )
 
@@ -20,6 +21,17 @@ func main() {
 	// initialize the configuration
 	cfg, err := configs.LoadConfigs(*FlagConfigFilePath)
 	if err != nil {
+		panic(err)
+	}
+
+	// create a digger instance
+	digger, err := cmd.NewDigger(cfg, *FlagMetric, *FlagTimeFrom, *FlagTimeTo)
+	if err != nil {
+		panic(err)
+	}
+
+	// call the digger
+	if err := digger.Dig(); err != nil {
 		panic(err)
 	}
 }

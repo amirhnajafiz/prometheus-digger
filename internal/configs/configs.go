@@ -3,6 +3,7 @@ package configs
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
@@ -29,6 +30,9 @@ func LoadConfigs(path string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config file `%s`: %v", path, err)
 	}
+
+	// trim '/' from Prometheus URL
+	cfg.PrometheusURL = strings.Trim(cfg.PrometheusURL, "/")
 
 	return &cfg, nil
 }

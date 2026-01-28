@@ -1,10 +1,11 @@
 package client
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
-
-	"github.com/amirhnajafiz/prometheus-digger/pkg/networking"
 )
 
 // calling the query range API on the Prometheus
@@ -12,7 +13,7 @@ const API = "/api/v1/query_range"
 
 func FetchMetricByGET(url, metric, step string, from, to time.Time) ([]byte, error) {
 	// create HTTP GET request
-	req, err := networking.NewHttpGetRequest(url + API)
+	req, err := http.NewRequest("GET", url+API, nil)
 	if err != nil {
 		return nil, fmt.Errorf("build GET request failed: %v", err)
 	}
@@ -30,7 +31,7 @@ func FetchMetricByGET(url, metric, step string, from, to time.Time) ([]byte, err
 	req.Header.Set("Accept", "application/json")
 
 	// fetch metrics by sending the http request
-	return networking.HTTPSend(req)
+	return sendHTTPReqeust(req)
 }
 
 func FetchMetricByPOST(url, metric, step string, from, to time.Time) ([]byte, error) {
@@ -44,7 +45,7 @@ func FetchMetricByPOST(url, metric, step string, from, to time.Time) ([]byte, er
 	)
 
 	// create HTTP POST request
-	req, err := networking.NewHttpPostRequest(url+API, []byte(body))
+	req, err := http.NewRequest("POST", url+API, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return nil, fmt.Errorf("build POST request failed: %v", err)
 	}
@@ -54,5 +55,31 @@ func FetchMetricByPOST(url, metric, step string, from, to time.Time) ([]byte, er
 	req.Header.Set("Accept", "application/json")
 
 	// fetch metrics by sending the http request
-	return networking.HTTPSend(req)
+	return sendHTTPReqeust(req)
+}
+
+// sends the given HTTP request and returns the response body.
+func sendHTTPReqeust(req *http.Request) ([]byte, error) {
+	// create the http client
+	client := http.Client{}
+
+	// send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed HTTP: [`%d`] %s", resp.StatusCode, string(body))
+	}
+
+	return body, nil
 }
