@@ -6,6 +6,7 @@ import (
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/client"
 	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
+	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
 // Digger is the main handler for fetching the metrics from Prometheus API.
@@ -72,7 +73,7 @@ func (d *Digger) Dig() error {
 			d.To,
 		)
 	} else {
-		response, err = client.FetchMetricByGET(
+		response, err = client.FetchMetricByPOST(
 			d.URL,
 			d.Metric,
 			d.Steps.String(),
@@ -86,7 +87,10 @@ func (d *Digger) Dig() error {
 		return fmt.Errorf("failed to fetch metrics: %v", err)
 	}
 
-	fmt.Println(string(response))
+	// write the output to JSON file
+	if err := files.WriteFile("out", response); err != nil {
+		return fmt.Errorf("failed to save metrics: %v", err)
+	}
 
 	return nil
 }
