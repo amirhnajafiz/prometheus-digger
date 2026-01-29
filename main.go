@@ -11,6 +11,7 @@ func main() {
 	// register the flags
 	var (
 		FlagMetric         = flag.String("metric", "", "Metric to fetch from Prometheus")
+		FlagName           = flag.String("name", "", "Output name")
 		FlagTimeFrom       = flag.String("from", "", "The start timestamp in RFC3339 (2006-01-02T15:04:05Z07:00)")
 		FlagTimeTo         = flag.String("to", "", "The end timestamp in RFC3339 (2006-01-02T15:04:05Z07:00)")
 		FlagConfigFilePath = flag.String("config", "config.json", "Path to the configuration file")
@@ -25,7 +26,13 @@ func main() {
 	}
 
 	// create a digger instance
-	digger, err := cmd.NewDigger(cfg, *FlagMetric, *FlagTimeFrom, *FlagTimeTo)
+	digger, err := cmd.NewDigger(
+		cfg,
+		*FlagMetric,
+		*FlagTimeFrom,
+		*FlagTimeTo,
+		*FlagName,
+	)
 	if err != nil {
 		panic(err)
 	}

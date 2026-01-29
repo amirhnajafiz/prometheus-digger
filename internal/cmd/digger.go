@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"path"
 	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/client"
@@ -13,6 +14,7 @@ import (
 type Digger struct {
 	Timeout int
 	Metric  string
+	Name    string
 	URL     string
 	Step    time.Duration
 	From    time.Time
@@ -23,6 +25,7 @@ type Digger struct {
 func NewDigger(
 	cfg *configs.Config,
 	metric,
+	name,
 	from,
 	to string,
 ) (*Digger, error) {
@@ -30,6 +33,7 @@ func NewDigger(
 	instance := &Digger{
 		Timeout: cfg.RequestTimeout,
 		Metric:  metric,
+		Name:    name,
 		URL:     cfg.PrometheusURL,
 	}
 
@@ -65,11 +69,18 @@ func (d *Digger) Dig() error {
 	)
 
 	// get expected datapoints
-	dp := client.GetDataPoints(d.From, d.To, d.Step)
-	if dp > 1000 {
-		tranges = client.SplitTimeRange(d.From, d.To, d.Step, dp)
+	if dp := client.GetDataPoints(d.From, d.To, d.Step); dp > 1000 {
+		tranges = client.SplitTimeRange(d.From, d.To, d.Step, 1000)
 	} else {
 		tranges = []time.Time{d.From, d.To}
+	}
+
+	// make sure to send long requests as GET
+	var handler func(url, metric, step string, from, to time.Time) ([]byte, error)
+	if len(d.Metric) < 1024 {
+		handler = client.FetchMetricByGET
+	} else {
+		handler = client.FetchMetricByPOST
 	}
 
 	// loop over time ranges and submit the requests
@@ -77,24 +88,14 @@ func (d *Digger) Dig() error {
 		from := tranges[i]
 		to := tranges[i+1]
 
-		// make sure to send long requests as GET
-		if len(d.Metric) < 1024 {
-			response, err = client.FetchMetricByGET(
-				d.URL,
-				d.Metric,
-				d.Step.String(),
-				from,
-				to,
-			)
-		} else {
-			response, err = client.FetchMetricByPOST(
-				d.URL,
-				d.Metric,
-				d.Step.String(),
-				from,
-				to,
-			)
-		}
+		// call handler function
+		response, err = handler(
+			d.URL,
+			d.Metric,
+			d.Step.String(),
+			from,
+			to,
+		)
 
 		// check for errors
 		if err != nil {
@@ -102,7 +103,7 @@ func (d *Digger) Dig() error {
 		}
 
 		// write the output to JSON file
-		if err := files.WriteFile("out", response); err != nil {
+		if err := files.WriteFile(path.Join("out", d.Name), response); err != nil {
 			return fmt.Errorf("failed to save metrics: %v", err)
 		}
 	}
