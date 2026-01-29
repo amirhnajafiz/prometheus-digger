@@ -1,5 +1,6 @@
 package client
 
+// QueryRangeResponse is the model of JSON response that Prometheus API sends.
 type QueryRangeResponse struct {
 	Status string `json:"status"`
 	Data   struct {
