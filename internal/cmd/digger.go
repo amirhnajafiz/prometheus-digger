@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/client"
+	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
 // Digger is the main handler for fetching the metrics from Prometheus API.
@@ -47,6 +48,11 @@ func (d *Digger) Validate(from, to, step string) error {
 		return fmt.Errorf("invalid time for to `%s`: %v", to, err)
 	}
 	d.queryTo = td
+
+	// check the from and to range
+	if fd.After(td) {
+		return fmt.Errorf("to datetime must be after from: %s - %s", from, to)
+	}
 
 	// get expected datapoints
 	if dp := client.GetDataPoints(d.queryFrom, d.queryTo, d.queryStep); dp > 1000 {
@@ -121,19 +127,37 @@ func (d *Digger) writeQueryRangeCSV(apiBytes []byte, outputPath string) error {
 	}
 	sort.Strings(labels)
 
-	file, err := os.Create(outputPath)
+	var (
+		file       *os.File
+		err        error
+		appendMode bool
+	)
+
+	// check if file exists
+	if files.CheckFile(outputPath) {
+		file, err = os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		appendMode = true
+	} else {
+		file, err = os.Create(outputPath)
+		appendMode = false
+	}
+
+	// check errors
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
+	// create a new csv writer
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	// header
-	header := append([]string{"timestamp", "metric", "value"}, labels...)
-	if err := writer.Write(header); err != nil {
-		return err
+	// headers to be added only if file created for the first time
+	if !appendMode {
+		header := append([]string{"timestamp", "metric", "value"}, labels...)
+		if err := writer.Write(header); err != nil {
+			return err
+		}
 	}
 
 	// rows

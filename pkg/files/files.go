@@ -1,6 +1,9 @@
 package files
 
-import "os"
+import (
+	"errors"
+	"os"
+)
 
 // CheckDir checks if the input directory exists and creates it if it doesn't.
 func CheckDir(dir string) error {
@@ -13,6 +16,15 @@ func CheckDir(dir string) error {
 	}
 
 	return nil
+}
+
+// CheckFile only checks if a file already exists or not.
+func CheckFile(path string) bool {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		return false
+	}
+
+	return true
 }
 
 // WriteToFile stores data into the file name.
