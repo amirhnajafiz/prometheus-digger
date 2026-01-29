@@ -3,6 +3,7 @@ package configs
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
@@ -21,14 +22,17 @@ func LoadConfigs(path string) (*Config, error) {
 	// read config file
 	bytes, err := files.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file `%s`: %v", path, err)
+		log.Printf("failed to read config file `%s`: %v", path, err)
 	}
 
 	// unmarshal configs into an instance
 	cfg := Default()
-	err = json.Unmarshal(bytes, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config file `%s`: %v", path, err)
+
+	if len(bytes) > 0 {
+		err = json.Unmarshal(bytes, &cfg)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal config file `%s`: %v", path, err)
+		}
 	}
 
 	// trim '/' from Prometheus URL
