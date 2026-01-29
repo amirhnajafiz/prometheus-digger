@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// create the output directory
-	if err := files.CheckDir("out"); err != nil {
+	if err := files.CheckDir(cfg.DataDir); err != nil {
 		panic(err)
 	}
 
