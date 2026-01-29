@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"os"
 	"path"
+	"sort"
 	"time"
 
 	"github.com/amirhnajafiz/prometheus-digger/internal/client"
 	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
-	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
 // Digger is the main handler for fetching the metrics from Prometheus API.
@@ -103,8 +106,70 @@ func (d *Digger) Dig() error {
 		}
 
 		// write the output to JSON file
-		if err := files.WriteFile(path.Join("out", d.Name), response); err != nil {
+		if err := d.writeQueryRangeCSV(response, path.Join("out", d.Name+".csv")); err != nil {
 			return fmt.Errorf("failed to save metrics: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// parses Prometheus query_range JSON bytes and writes CSV.
+func (d *Digger) writeQueryRangeCSV(apiBytes []byte, outputPath string) error {
+	var resp client.QueryRangeResponse
+	if err := json.Unmarshal(apiBytes, &resp); err != nil {
+		return fmt.Errorf("invalid prometheus response: %w", err)
+	}
+
+	if resp.Status != "success" || resp.Data.ResultType != "matrix" {
+		return fmt.Errorf("unexpected prometheus response")
+	}
+
+	// collect all label keys (for CSV header)
+	labelSet := map[string]struct{}{}
+	for _, series := range resp.Data.Result {
+		for k := range series.Metric {
+			labelSet[k] = struct{}{}
+		}
+	}
+
+	labels := make([]string, 0, len(labelSet))
+	for k := range labelSet {
+		labels = append(labels, k)
+	}
+	sort.Strings(labels)
+
+	file, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// header
+	header := append([]string{"timestamp", "metric", "value"}, labels...)
+	if err := writer.Write(header); err != nil {
+		return err
+	}
+
+	// rows
+	for _, series := range resp.Data.Result {
+		metricName := series.Metric["__name__"]
+
+		for _, v := range series.Values {
+			ts := fmt.Sprintf("%.0f", v[0].(float64))
+			value := v[1].(string)
+
+			row := []string{ts, metricName, value}
+			for _, label := range labels {
+				row = append(row, series.Metric[label])
+			}
+
+			if err := writer.Write(row); err != nil {
+				return err
+			}
 		}
 	}
 
