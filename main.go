@@ -35,12 +35,13 @@ func main() {
 
 	// create a digger instance and validate the inputs
 	digger := cmd.Digger{
+		ESC:         cfg.EstimatedSeriesCount,
 		HTTPTimeout: cfg.RequestTimeout,
 		PromMetric:  *FlagMetric,
 		PromURL:     cfg.PrometheusURL,
 		OutputPath:  path.Join(cfg.DataDir, *FlagName),
 	}
-	if err := digger.Validate(*FlagTimeFrom, *FlagTimeTo, cfg.Steps); err != nil {
+	if err := digger.Validate(*FlagTimeFrom, *FlagTimeTo, cfg.Step); err != nil {
 		panic(err)
 	}
 

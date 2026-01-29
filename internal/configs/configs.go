@@ -11,10 +11,11 @@ import (
 
 // Config holds the configuration of the the digger.
 type Config struct {
-	RequestTimeout int    `json:"request_timeout"`
-	DataDir        string `json:"data_directory"`
-	PrometheusURL  string `json:"prometheus_url"`
-	Steps          string `json:"steps"`
+	EstimatedSeriesCount int    `json:"esc"`
+	RequestTimeout       int    `json:"request_timeout"`
+	DataDir              string `json:"data_directory"`
+	PrometheusURL        string `json:"prometheus_url"`
+	Step                 string `json:"step"`
 }
 
 // LoadConfigs reads a json format config file and returns a config instance.

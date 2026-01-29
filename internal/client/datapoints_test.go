@@ -30,7 +30,7 @@ func TestGetDataPoints(t *testing.T) {
 	}
 
 	for i := range len(cases) {
-		got := GetDataPoints(cases[i][0], cases[i][1], steps[i])
+		got := GetDataPoints(cases[i][0], cases[i][1], steps[i], 1)
 		if got != want[i] {
 			t.Errorf(
 				"input: (%s, %s, %f), output: %d, expected: %d",

@@ -11,12 +11,13 @@ func GetDataPoints(
 	from,
 	to time.Time,
 	step time.Duration,
+	series int,
 ) int {
 	fint := from.Unix()
 	tint := to.Unix()
 	ts := int64(math.Max(step.Seconds(), 1))
 
-	return int((tint - fint) / ts)
+	return int((tint-fint)/ts) * series
 }
 
 // SplitTimeRange returns timestamps splits with maximum 11,000 expected
