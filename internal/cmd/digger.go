@@ -60,7 +60,7 @@ func (d *Digger) Validate(from, to, step string) error {
 
 	// get expected datapoints
 	if dp := client.GetDataPoints(d.queryFrom, d.queryTo, d.queryStep, d.ESC); dp > 1000 {
-		d.queryRange = client.SplitTimeRange(d.queryFrom, d.queryTo, d.queryStep, 1000)
+		d.queryRange = client.SplitTimeRange(d.queryFrom, d.queryTo, d.queryStep, 1000, dp)
 	} else {
 		d.queryRange = []time.Time{d.queryFrom, d.queryTo}
 	}
