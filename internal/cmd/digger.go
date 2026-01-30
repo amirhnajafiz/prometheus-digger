@@ -15,12 +15,15 @@ import (
 
 // Digger is the main handler for fetching the metrics from Prometheus API.
 type Digger struct {
-	ESC         int
-	HTTPTimeout int
-	PromMetric  string
-	PromURL     string
-	OutputPath  string
+	// public fields
+	AddExtraCSVLabels bool
+	ESC               int
+	HTTPTimeout       int
+	PromMetric        string
+	PromURL           string
+	OutputPath        string
 
+	// private fields
 	queryDataPoints int
 	queryStep       time.Duration
 	queryFrom       time.Time
@@ -68,7 +71,7 @@ func (d *Digger) Validate(from, to, step string) error {
 // Dig collects a metric from Prometheus API.
 func (d *Digger) Dig() error {
 	// make sure to send long requests as GET
-	var handler func(url, metric, step string, from, to time.Time) ([]byte, error)
+	var handler func(url, metric, step string, from, to time.Time, timeout int) ([]byte, error)
 	if len(d.PromMetric) < 1024 {
 		handler = client.FetchMetricByGET
 	} else {
@@ -87,6 +90,7 @@ func (d *Digger) Dig() error {
 			d.queryStep.String(),
 			from,
 			to,
+			d.HTTPTimeout,
 		)
 
 		// check for errors
@@ -115,18 +119,23 @@ func (d *Digger) writeQueryRangeCSV(apiBytes []byte, outputPath string) error {
 	}
 
 	// collect all label keys (for CSV header)
-	labelSet := map[string]struct{}{}
-	for _, series := range resp.Data.Result {
-		for k := range series.Metric {
-			labelSet[k] = struct{}{}
+	var labels []string
+	if d.AddExtraCSVLabels {
+		labelSet := map[string]struct{}{}
+		for _, series := range resp.Data.Result {
+			for k := range series.Metric {
+				labelSet[k] = struct{}{}
+			}
 		}
-	}
 
-	labels := make([]string, 0, len(labelSet))
-	for k := range labelSet {
-		labels = append(labels, k)
+		labels = make([]string, 0, len(labelSet))
+		for k := range labelSet {
+			labels = append(labels, k)
+		}
+		sort.Strings(labels)
+	} else {
+		labels = make([]string, 0)
 	}
-	sort.Strings(labels)
 
 	var (
 		file       *os.File

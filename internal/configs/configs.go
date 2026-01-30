@@ -11,6 +11,7 @@ import (
 
 // Config holds the configuration of the the digger.
 type Config struct {
+	AddExtraCSVLabels    bool   `json:"extra_csv_labels"`
 	EstimatedSeriesCount int    `json:"esc"`
 	RequestTimeout       int    `json:"request_timeout"`
 	DataDir              string `json:"data_directory"`

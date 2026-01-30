@@ -11,7 +11,11 @@ import (
 // calling the query range API on the Prometheus
 const API = "/api/v1/query_range"
 
-func FetchMetricByGET(url, metric, step string, from, to time.Time) ([]byte, error) {
+func FetchMetricByGET(
+	url, metric, step string,
+	from, to time.Time,
+	timeout int,
+) ([]byte, error) {
 	// create HTTP GET request
 	req, err := http.NewRequest("GET", url+API, nil)
 	if err != nil {
@@ -31,10 +35,14 @@ func FetchMetricByGET(url, metric, step string, from, to time.Time) ([]byte, err
 	req.Header.Set("Accept", "application/json")
 
 	// fetch metrics by sending the http request
-	return sendHTTPReqeust(req)
+	return sendHTTPReqeust(req, timeout)
 }
 
-func FetchMetricByPOST(url, metric, step string, from, to time.Time) ([]byte, error) {
+func FetchMetricByPOST(
+	url, metric, step string,
+	from, to time.Time,
+	timeout int,
+) ([]byte, error) {
 	// form the request body
 	body := fmt.Sprintf(
 		"query=%s&start=%s&end=%s&step=%s",
@@ -55,13 +63,15 @@ func FetchMetricByPOST(url, metric, step string, from, to time.Time) ([]byte, er
 	req.Header.Set("Accept", "application/json")
 
 	// fetch metrics by sending the http request
-	return sendHTTPReqeust(req)
+	return sendHTTPReqeust(req, timeout)
 }
 
 // sends the given HTTP request and returns the response body.
-func sendHTTPReqeust(req *http.Request) ([]byte, error) {
+func sendHTTPReqeust(req *http.Request, timeout int) ([]byte, error) {
 	// create the http client
-	client := http.Client{}
+	client := http.Client{
+		Timeout: time.Duration(timeout) * time.Second,
+	}
 
 	// send the request
 	resp, err := client.Do(req)
