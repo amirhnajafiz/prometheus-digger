@@ -3,14 +3,33 @@ package client
 import (
 	"fmt"
 	"time"
+
+	"github.com/amirhnajafiz/prometheus-digger/internal/datapoints"
 )
+
+const dbLimit = 1000
 
 // Client is responsible for managing requests to the Prometheus API.
 type Client struct {
+	Series  int
+	Timeout int
 	URL     string
 	Query   string
 	Step    string
-	Timeout int
+}
+
+// TimeRanges split the query from `start` to `end`, making sure that each
+// request contains less that `dbLimit` datapoints in its response.
+func (c *Client) TimeRanges(start, end time.Time, step time.Duration) []time.Time {
+	// get expected datapoints
+	var tranges []time.Time
+	if dp := datapoints.GetDataPoints(start, end, step, c.Series); dp > dbLimit {
+		tranges = datapoints.SplitTimeRange(start, end, step, dbLimit, dp)
+	} else {
+		tranges = []time.Time{start, end}
+	}
+
+	return tranges
 }
 
 // Pull the records of the given query in from `start` to `end`.

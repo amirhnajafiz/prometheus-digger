@@ -25,13 +25,12 @@ type Digger struct {
 	// private fields
 	queryDataPoints int
 	queryStep       time.Duration
-	queryFrom       time.Time
-	queryTo         time.Time
-	queryRange      []time.Time
+	queryStart      time.Time
+	queryEnd        time.Time
 }
 
 // NewDigger returns an instance of digger.
-func (d *Digger) Validate(from, to, step string) error {
+func (d *Digger) Validate(start, end, step string) error {
 	// convert steps to duration
 	du, err := time.ParseDuration(step)
 	if err != nil {
@@ -40,28 +39,21 @@ func (d *Digger) Validate(from, to, step string) error {
 	d.queryStep = du
 
 	// convert from and to into time.Time
-	fd, err := time.Parse(time.RFC3339, from)
+	startDT, err := time.Parse(time.RFC3339, start)
 	if err != nil {
-		return fmt.Errorf("invalid time for from `%s`: %v", from, err)
+		return fmt.Errorf("invalid time for start `%s`: %v", start, err)
 	}
-	d.queryFrom = fd
+	d.queryStart = startDT
 
-	td, err := time.Parse(time.RFC3339, to)
+	endDT, err := time.Parse(time.RFC3339, end)
 	if err != nil {
-		return fmt.Errorf("invalid time for to `%s`: %v", to, err)
+		return fmt.Errorf("invalid time for end `%s`: %v", end, err)
 	}
-	d.queryTo = td
+	d.queryEnd = endDT
 
 	// check the from and to range
-	if fd.After(td) {
-		return fmt.Errorf("to datetime must be after from: %s - %s", from, to)
-	}
-
-	// get expected datapoints
-	if dp := client.GetDataPoints(d.queryFrom, d.queryTo, d.queryStep, d.ESC); dp > 1000 {
-		d.queryRange = client.SplitTimeRange(d.queryFrom, d.queryTo, d.queryStep, 1000, dp)
-	} else {
-		d.queryRange = []time.Time{d.queryFrom, d.queryTo}
+	if startDT.After(endDT) {
+		return fmt.Errorf("to datetime must be after from: %s - %s", start, end)
 	}
 
 	return nil
@@ -69,13 +61,6 @@ func (d *Digger) Validate(from, to, step string) error {
 
 // Dig collects a metric from Prometheus API.
 func (d *Digger) Dig() error {
-	pc := client.Client{
-		URL:     d.PromURL,
-		Metric:  d.PromMetric,
-		Step:    d.queryStep.String(),
-		Timeout: d.HTTPTimeout,
-	}
-
 }
 
 // parses Prometheus query_range JSON bytes and writes CSV.
