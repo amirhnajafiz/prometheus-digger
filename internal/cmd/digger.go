@@ -1,15 +1,8 @@
 package cmd
 
 import (
-	"encoding/csv"
-	"encoding/json"
 	"fmt"
-	"os"
-	"sort"
 	"time"
-
-	"github.com/amirhnajafiz/prometheus-digger/internal/client"
-	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
 // Digger is the main handler for fetching the metrics from Prometheus API.
@@ -23,10 +16,9 @@ type Digger struct {
 	OutputPath        string
 
 	// private fields
-	queryDataPoints int
-	queryStep       time.Duration
-	queryStart      time.Time
-	queryEnd        time.Time
+	queryStep  time.Duration
+	queryStart time.Time
+	queryEnd   time.Time
 }
 
 // NewDigger returns an instance of digger.
@@ -61,89 +53,5 @@ func (d *Digger) Validate(start, end, step string) error {
 
 // Dig collects a metric from Prometheus API.
 func (d *Digger) Dig() error {
-}
-
-// parses Prometheus query_range JSON bytes and writes CSV.
-func (d *Digger) writeQueryRangeCSV(apiBytes []byte, outputPath string) error {
-	var resp client.QueryRangeResponse
-	if err := json.Unmarshal(apiBytes, &resp); err != nil {
-		return fmt.Errorf("invalid prometheus response: %w", err)
-	}
-
-	if resp.Status != "success" || resp.Data.ResultType != "matrix" {
-		return fmt.Errorf("unexpected prometheus response")
-	}
-
-	// collect all label keys (for CSV header)
-	var labels []string
-	if d.AddExtraCSVLabels {
-		labelSet := map[string]struct{}{}
-		for _, series := range resp.Data.Result {
-			for k := range series.Metric {
-				labelSet[k] = struct{}{}
-			}
-		}
-
-		labels = make([]string, 0, len(labelSet))
-		for k := range labelSet {
-			labels = append(labels, k)
-		}
-		sort.Strings(labels)
-	} else {
-		labels = make([]string, 0)
-	}
-
-	var (
-		file       *os.File
-		err        error
-		appendMode bool
-	)
-
-	// check if file exists
-	if files.CheckFile(outputPath) {
-		file, err = os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-		appendMode = true
-	} else {
-		file, err = os.Create(outputPath)
-		appendMode = false
-	}
-
-	// check errors
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// create a new csv writer
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	// headers to be added only if file created for the first time
-	if !appendMode {
-		header := append([]string{"timestamp", "metric", "value"}, labels...)
-		if err := writer.Write(header); err != nil {
-			return err
-		}
-	}
-
-	// rows
-	for _, series := range resp.Data.Result {
-		metricName := series.Metric["__name__"]
-
-		for _, v := range series.Values {
-			ts := fmt.Sprintf("%.0f", v[0].(float64))
-			value := v[1].(string)
-
-			row := []string{ts, metricName, value}
-			for _, label := range labels {
-				row = append(row, series.Metric[label])
-			}
-
-			if err := writer.Write(row); err != nil {
-				return err
-			}
-		}
-	}
-
 	return nil
 }
