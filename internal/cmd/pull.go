@@ -10,14 +10,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PullCMD command gets the records of one single Prometheus query.
 type PullCMD struct {
 	// public fields
 	ConfigPath string
+	StartFlag  string
+	EndFlag    string
 
 	// private fields
+	queryFlag string
 	cfg       *configs.Config
-	startFlag string
-	endFlag   string
 
 	// query fields
 	queryStep  time.Duration
@@ -25,8 +27,12 @@ type PullCMD struct {
 	queryEnd   time.Time
 }
 
+// Command builds and returns the cobra command of PullCMD.
 func (p *PullCMD) Command() *cobra.Command {
-	return &cobra.Command{
+	command := &cobra.Command{
+		Use:   "pull",
+		Short: "Pull a single query records",
+		Long:  "Pull records of a single Prometheus query",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := p.initVars(); err != nil {
 				panic(err)
@@ -35,6 +41,12 @@ func (p *PullCMD) Command() *cobra.Command {
 			p.main()
 		},
 	}
+
+	command.
+		PersistentFlags().
+		StringVarP(&p.queryFlag, "query", "q", "node_uptime", "prometheus query")
+
+	return command
 }
 
 func (p *PullCMD) initVars() error {
@@ -44,8 +56,10 @@ func (p *PullCMD) initVars() error {
 		return err
 	}
 
+	p.cfg = cfg
+
 	// create the output directory
-	if err := files.CheckDir(cfg.DataDir); err != nil {
+	if err := files.CheckDir(p.cfg.DataDir); err != nil {
 		return err
 	}
 
@@ -57,24 +71,26 @@ func (p *PullCMD) initVars() error {
 	p.queryStep = du
 
 	// convert from and to into time.Time
-	startDT, err := time.Parse(time.RFC3339, p.startFlag)
+	startDT, err := time.Parse(time.RFC3339, p.StartFlag)
 	if err != nil {
-		return fmt.Errorf("invalid time for start `%s`: %v", p.startFlag, err)
+		return fmt.Errorf("invalid time for start `%s`: %v", p.StartFlag, err)
 	}
 	p.queryStart = startDT
 
-	endDT, err := time.Parse(time.RFC3339, p.endFlag)
+	endDT, err := time.Parse(time.RFC3339, p.EndFlag)
 	if err != nil {
-		return fmt.Errorf("invalid time for end `%s`: %v", p.endFlag, err)
+		return fmt.Errorf("invalid time for end `%s`: %v", p.EndFlag, err)
 	}
 	p.queryEnd = endDT
 
 	// check the from and to range
 	if startDT.After(endDT) {
-		return fmt.Errorf("to datetime must be after from: %s - %s", p.startFlag, p.endFlag)
+		return fmt.Errorf("to datetime must be after from: %s - %s", p.StartFlag, p.EndFlag)
 	}
 
 	return nil
 }
 
-func (p *PullCMD) main() {}
+func (p *PullCMD) main() {
+
+}
