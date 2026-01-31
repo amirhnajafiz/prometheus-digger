@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"sort"
 	"time"
 
@@ -70,41 +69,13 @@ func (d *Digger) Validate(from, to, step string) error {
 
 // Dig collects a metric from Prometheus API.
 func (d *Digger) Dig() error {
-	// make sure to send long requests as GET
-	var handler func(url, metric, step string, from, to time.Time, timeout int) ([]byte, error)
-	if len(d.PromMetric) < 1024 {
-		handler = client.FetchMetricByGET
-	} else {
-		handler = client.FetchMetricByPOST
+	pc := client.Client{
+		URL:     d.PromURL,
+		Metric:  d.PromMetric,
+		Step:    d.queryStep.String(),
+		Timeout: d.HTTPTimeout,
 	}
 
-	// loop over time ranges and submit the requests
-	for i := 0; i < len(d.queryRange)-1; i++ {
-		from := d.queryRange[i]
-		to := d.queryRange[i+1]
-
-		// call handler function
-		response, err := handler(
-			d.PromURL,
-			d.PromMetric,
-			d.queryStep.String(),
-			from,
-			to,
-			d.HTTPTimeout,
-		)
-
-		// check for errors
-		if err != nil {
-			return fmt.Errorf("failed to fetch metrics: %v", err)
-		}
-
-		// write the output to JSON file
-		if err := d.writeQueryRangeCSV(response, path.Join(d.OutputPath+".csv")); err != nil {
-			return fmt.Errorf("failed to save metrics: %v", err)
-		}
-	}
-
-	return nil
 }
 
 // parses Prometheus query_range JSON bytes and writes CSV.

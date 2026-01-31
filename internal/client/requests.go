@@ -11,49 +11,41 @@ import (
 // calling the query range API on the Prometheus
 const API = "/api/v1/query_range"
 
-func FetchMetricByGET(
-	url, metric, step string,
-	from, to time.Time,
-	timeout int,
-) ([]byte, error) {
+func (c *Client) GET(start, end time.Time) ([]byte, error) {
 	// create HTTP GET request
-	req, err := http.NewRequest("GET", url+API, nil)
+	req, err := http.NewRequest("GET", c.URL+API, nil)
 	if err != nil {
 		return nil, fmt.Errorf("build GET request failed: %v", err)
 	}
 
 	// set query parameters
 	q := req.URL.Query()
-	q.Add("query", metric)
-	q.Add("start", from.Format(time.RFC3339))
-	q.Add("end", to.Format(time.RFC3339))
-	q.Add("step", step)
+	q.Add("query", c.Query)
+	q.Add("start", start.Format(time.RFC3339))
+	q.Add("end", end.Format(time.RFC3339))
+	q.Add("step", c.Step)
 	req.URL.RawQuery = q.Encode()
 
 	// set the headers
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	// fetch metrics by sending the http request
-	return sendHTTPReqeust(req, timeout)
+	// get results by sending a http request
+	return c.sendHTTPReqeust(req)
 }
 
-func FetchMetricByPOST(
-	url, metric, step string,
-	from, to time.Time,
-	timeout int,
-) ([]byte, error) {
+func (c *Client) POST(start, end time.Time) ([]byte, error) {
 	// form the request body
 	body := fmt.Sprintf(
 		"query=%s&start=%s&end=%s&step=%s",
-		metric,
-		from.Format(time.RFC3339),
-		to.Format(time.RFC3339),
-		step,
+		c.Query,
+		start.Format(time.RFC3339),
+		end.Format(time.RFC3339),
+		c.Step,
 	)
 
 	// create HTTP POST request
-	req, err := http.NewRequest("POST", url+API, bytes.NewBuffer([]byte(body)))
+	req, err := http.NewRequest("POST", c.URL+API, bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return nil, fmt.Errorf("build POST request failed: %v", err)
 	}
@@ -62,15 +54,15 @@ func FetchMetricByPOST(
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
-	// fetch metrics by sending the http request
-	return sendHTTPReqeust(req, timeout)
+	// get results by sending a http request
+	return c.sendHTTPReqeust(req)
 }
 
 // sends the given HTTP request and returns the response body.
-func sendHTTPReqeust(req *http.Request, timeout int) ([]byte, error) {
+func (c *Client) sendHTTPReqeust(req *http.Request) ([]byte, error) {
 	// create the http client
 	client := http.Client{
-		Timeout: time.Duration(timeout) * time.Second,
+		Timeout: time.Duration(c.Timeout) * time.Second,
 	}
 
 	// send the request
