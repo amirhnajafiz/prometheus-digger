@@ -8,9 +8,6 @@ import (
 	"time"
 )
 
-// calling the query range API on the Prometheus
-const API = "/api/v1/query_range"
-
 func (c *Client) GET(start, end time.Time) ([]byte, error) {
 	// create HTTP GET request
 	req, err := http.NewRequest("GET", c.URL+API, nil)

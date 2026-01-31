@@ -12,7 +12,10 @@ import (
 	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
 )
 
-const dbLimit = 1000
+const (
+	DatapointsLimit = 1000
+	API             = "/api/v1/query_range"
+)
 
 // Client is responsible for managing requests to the Prometheus API.
 type Client struct {
@@ -29,8 +32,8 @@ type Client struct {
 func (c *Client) TimeRanges(start, end time.Time, step time.Duration) []time.Time {
 	// get expected datapoints
 	var tranges []time.Time
-	if dp := datapoints.GetDataPoints(start, end, step, c.Series); dp > dbLimit {
-		tranges = datapoints.SplitTimeRange(start, end, step, dbLimit, dp)
+	if dp := datapoints.GetDataPoints(start, end, step, c.Series); dp > DatapointsLimit {
+		tranges = datapoints.SplitTimeRange(start, end, step, DatapointsLimit, dp)
 	} else {
 		tranges = []time.Time{start, end}
 	}
@@ -93,7 +96,12 @@ func (c *Client) ExtractLabels(qrr *QueryRangeResponse) []string {
 	return labels
 }
 
-// WriteQueryRangeCSV, parses Prometheus query_range JSON bytes and writes them into
+// JSONExport, writes the JSON response from Prometheus API into a file.
+func (c *Client) JSONExport(response []byte) error {
+	return files.WriteFile(c.OutputPath+".json", response)
+}
+
+// CSVExport, parses Prometheus query_range JSON bytes and writes them into
 // a CSV file with given output path.
 func (c *Client) CSVExport(qrr *QueryRangeResponse, labels ...string) error {
 	var (
@@ -103,10 +111,11 @@ func (c *Client) CSVExport(qrr *QueryRangeResponse, labels ...string) error {
 	)
 
 	// check if file exists
-	if appendMode = files.CheckFile(c.OutputPath); appendMode {
-		file, err = os.OpenFile(c.OutputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	path := c.OutputPath + ".csv"
+	if appendMode = files.CheckFile(path); appendMode {
+		file, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	} else {
-		file, err = os.Create(c.OutputPath)
+		file, err = os.Create(path)
 	}
 
 	// check errors
