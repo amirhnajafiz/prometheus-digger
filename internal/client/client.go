@@ -98,7 +98,28 @@ func (c *Client) ExtractLabels(qrr *QueryRangeResponse) []string {
 
 // JSONExport, writes the JSON response from Prometheus API into a file.
 func (c *Client) JSONExport(response []byte) error {
-	return files.WriteFile(c.OutputPath+".json", response)
+	var (
+		file       *os.File
+		err        error
+		appendMode bool
+	)
+
+	// check if file exists
+	path := c.OutputPath + ".jsonl"
+	if appendMode = files.CheckFile(path); appendMode {
+		file, err = os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	} else {
+		file, err = os.Create(path)
+	}
+
+	// check errors
+	if err != nil {
+		return fmt.Errorf("failed to open output file `%s`: %v", c.OutputPath, err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(string(response))
+	return err
 }
 
 // CSVExport, parses Prometheus query_range JSON bytes and writes them into

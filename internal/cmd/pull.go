@@ -45,10 +45,10 @@ func (p *PullCMD) Command() *cobra.Command {
 
 	command.
 		PersistentFlags().
-		StringVar(&p.query, "query", "node_uptime", "prometheus query")
+		StringVar(&p.query, "query", "node_cpu", "prometheus query")
 	command.
 		PersistentFlags().
-		StringVar(&p.queryOutput, "output", "node_uptime", "output file name")
+		StringVar(&p.queryOutput, "output", "node_cpu", "output file name")
 
 	return command
 }
