@@ -121,10 +121,12 @@ func (p *PullCMD) main() {
 		}
 
 		if p.RootCMD.JSONOut {
+			// call json export
 			if err := promClient.JSONExport(response); err != nil {
 				panic(err)
 			}
-		} else if p.RootCMD.CSVOut {
+		}
+		if p.RootCMD.CSVOut {
 			// convert to qqr
 			qqr, err := promClient.JSONToQRR(response)
 			if err != nil {
@@ -141,7 +143,10 @@ func (p *PullCMD) main() {
 			if err := promClient.CSVExport(qqr, labels...); err != nil {
 				panic(err)
 			}
-		} else {
+		}
+
+		// dump to STDOUT if there is not export flag provided
+		if !p.RootCMD.CSVOut && !p.RootCMD.JSONOut {
 			fmt.Println(string(response))
 		}
 	}
