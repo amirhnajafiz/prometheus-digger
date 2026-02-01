@@ -10,9 +10,7 @@ func main() {
 	// add sub-commands
 	root.AddCommand(
 		(&cmd.PullCMD{
-			ConfigPath: rcm.ConfigPath,
-			StartFlag:  rcm.StartFlag,
-			EndFlag:    rcm.EndFlag,
+			RootCMD: &rcm,
 		}).Command(),
 	)
 
