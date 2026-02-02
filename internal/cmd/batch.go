@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// BatchCMD reads the queries from a file and pulls them sequentially.
 type BatchCMD struct {
 	// public fields
 	RootCMD *RootCMD
