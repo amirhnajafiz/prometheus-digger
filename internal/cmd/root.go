@@ -22,16 +22,16 @@ func (r *RootCMD) Command() *cobra.Command {
 		StringVarP(&r.ConfigPath, "config-path", "c", "config.json", "path to a JSON configuration file")
 	command.
 		PersistentFlags().
-		StringVar(&r.StartFlag, "start", "2026-01-31T18:33:44-05:00", "query start time")
+		StringVarP(&r.StartFlag, "start", "s", "2026-01-31T18:33:44-05:00", "query start time")
 	command.
 		PersistentFlags().
-		StringVar(&r.EndFlag, "end", "2026-01-31T18:34:44-05:00", "query end time")
+		StringVarP(&r.EndFlag, "end", "e", "2026-01-31T18:34:44-05:00", "query end time")
 	command.
 		PersistentFlags().
-		BoolVar(&r.JSONOut, "json-out", false, "export to JSON output")
+		BoolVarP(&r.JSONOut, "json-out", "j", false, "export to JSON output")
 	command.
 		PersistentFlags().
-		BoolVar(&r.CSVOut, "csv-out", false, "export to CSV output")
+		BoolVarP(&r.CSVOut, "csv-out", "v", false, "export to CSV output")
 
 	return command
 }

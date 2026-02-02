@@ -32,7 +32,7 @@ type BatchCMD struct {
 func (b *BatchCMD) Command() *cobra.Command {
 	command := &cobra.Command{
 		Use:   "batch",
-		Short: "Batch multiple queries records",
+		Short: "Batch pull multiple queries records",
 		Long:  "Batch pull records of Prometheus queries",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := b.initVars(); err != nil {
