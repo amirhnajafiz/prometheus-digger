@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"path"
 	"time"
 
@@ -106,6 +107,8 @@ func (b *BatchCMD) initVars() error {
 
 func (b *BatchCMD) main() {
 	for k, v := range b.batch.Records {
+		log.Printf("query `%s` start.\n", v)
+
 		// create a client instance
 		promClient := client.Client{
 			Series:     b.cfg.EstimatedSeriesCount,
@@ -160,5 +163,7 @@ func (b *BatchCMD) main() {
 				fmt.Println(string(response))
 			}
 		}
+
+		log.Printf("query `%s` completed.\n", v)
 	}
 }

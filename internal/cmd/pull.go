@@ -153,4 +153,6 @@ func (p *PullCMD) main() {
 			fmt.Println(string(response))
 		}
 	}
+
+	log.Printf("query `%s` completed.\n", p.query)
 }
