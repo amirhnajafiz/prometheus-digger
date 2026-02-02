@@ -12,6 +12,9 @@ func main() {
 		(&cmd.PullCMD{
 			RootCMD: &rcm,
 		}).Command(),
+		(&cmd.BatchCMD{
+			RootCMD: &rcm,
+		}).Command(),
 	)
 
 	// execute the command
