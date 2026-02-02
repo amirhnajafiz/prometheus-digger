@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"path"
 	"time"
 
@@ -96,6 +97,8 @@ func (p *PullCMD) initVars() error {
 }
 
 func (p *PullCMD) main() {
+	log.Printf("query `%s` start.\n", p.query)
+
 	// create a client instance
 	promClient := client.Client{
 		Series:     p.cfg.EstimatedSeriesCount,
