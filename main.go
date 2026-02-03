@@ -13,6 +13,7 @@ func main() {
 
 	// add sub-commands
 	root.AddCommand(
+		(&cmd.VCMD{}).Command(),
 		(&cmd.ConfigCMD{
 			RootCMD: &rcm,
 		}).Command(),

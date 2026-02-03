@@ -62,14 +62,14 @@ func (h *HealthCMD) initVars() error {
 func (h *HealthCMD) main() {
 	log.Printf("checking %s ...\n", h.cfg.PrometheusURL)
 
-	hurl := fmt.Sprintf("%s/healthy", h.cfg.PrometheusURL)
+	hurl := fmt.Sprintf("%s/-/healthy", h.cfg.PrometheusURL)
 	if resp, err := http.Get(hurl); err != nil {
 		log.Fatalf("server error: %v\n", err)
 	} else if resp.StatusCode != http.StatusOK {
 		log.Fatalf("server returned: %d\n", resp.StatusCode)
 	}
 
-	rurl := fmt.Sprintf("%s/ready", h.cfg.PrometheusURL)
+	rurl := fmt.Sprintf("%s/-/ready", h.cfg.PrometheusURL)
 	if resp, err := http.Get(rurl); err != nil {
 		log.Fatalf("server ready error: %v\n", err)
 	} else if resp.StatusCode != http.StatusOK {
