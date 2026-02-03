@@ -47,11 +47,13 @@ else
   install -m 0755 "$APP_NAME" "$INSTALL_DIR/$APP_NAME"
 fi
 
-rm -rf ~/.promdigger
-mkdir ~/.promdigger
+if [ -e "~/.promdigger/config.json" ]; then
+  rm -rf ~/.promdigger
+  mkdir ~/.promdigger
 
-cp example.config.json ~/.promdigger/config.json
-chmod 644 ~/.promdigger/config.json
+  cp example.config.json ~/.promdigger/config.json
+  chmod 644 ~/.promdigger/config.json
+fi
 
 echo "✅ Installation complete!"
 echo "Config: ~/.promdigger/config.json"
