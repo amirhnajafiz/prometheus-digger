@@ -47,5 +47,11 @@ else
   install -m 0755 "$APP_NAME" "$INSTALL_DIR/$APP_NAME"
 fi
 
+rm -rf ~/.promdigger
+mkdir ~/.promdigger
+
+cp example.config.json ~/.promdigger/config.json
+chmod 644 ~/.promdigger/config.json
+
 echo "✅ Installation complete!"
 echo "👉 Run: $APP_NAME --help"
