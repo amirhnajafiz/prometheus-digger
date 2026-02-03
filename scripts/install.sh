@@ -54,4 +54,5 @@ cp example.config.json ~/.promdigger/config.json
 chmod 644 ~/.promdigger/config.json
 
 echo "✅ Installation complete!"
+echo "Config: ~/.promdigger/config.json"
 echo "👉 Run: $APP_NAME --help"

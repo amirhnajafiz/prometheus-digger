@@ -29,5 +29,6 @@ test: ## Run unit tests
 
 clean: ## Remove generated files
 	rm -rf $(APP_NAME) $(DIST)
+	rm -rf data
 	go clean
 
