@@ -27,6 +27,16 @@ type Client struct {
 	OutputPath string
 }
 
+// reset the client object.
+func (c *Client) reset() {
+	c.Series = 0
+	c.Timeout = 0
+	c.URL = ""
+	c.Query = ""
+	c.Step = ""
+	c.OutputPath = ""
+}
+
 // TimeRanges split the query from `start` to `end`, making sure that each
 // request contains less that `dbLimit` datapoints in its response.
 func (c *Client) TimeRanges(start, end time.Time, step time.Duration) []time.Time {

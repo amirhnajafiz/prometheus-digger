@@ -116,18 +116,20 @@ func (b *BatchCMD) initVars() error {
 }
 
 func (b *BatchCMD) main() {
+	cpool := client.NewObjectPool()
+
 	for k, v := range b.batch.Records {
 		log.Printf("query `%s` start.\n", v)
 
 		// create a client instance
-		promClient := client.Client{
-			Series:     b.cfg.EstimatedSeriesCount,
-			Timeout:    b.cfg.RequestTimeout,
-			URL:        b.cfg.PrometheusURL,
-			Query:      v,
-			Step:       b.cfg.Step,
-			OutputPath: path.Join(b.cfg.DataDir, k),
-		}
+		promClient := cpool.GetClientObj()
+
+		promClient.Series = b.cfg.EstimatedSeriesCount
+		promClient.Timeout = b.cfg.RequestTimeout
+		promClient.URL = b.cfg.PrometheusURL
+		promClient.Query = v
+		promClient.Step = b.cfg.Step
+		promClient.OutputPath = path.Join(b.cfg.DataDir, k)
 
 		// call split range
 		ranges := promClient.TimeRanges(b.queryStart, b.queryEnd, b.queryStep)
@@ -175,5 +177,6 @@ func (b *BatchCMD) main() {
 		}
 
 		log.Printf("query `%s` completed.\n", v)
+		cpool.PutClientObj(promClient)
 	}
 }
