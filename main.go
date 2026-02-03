@@ -12,6 +12,9 @@ func main() {
 		(&cmd.ConfigCMD{
 			RootCMD: &rcm,
 		}).Command(),
+		(&cmd.HealthCMD{
+			RootCMD: &rcm,
+		}).Command(),
 		(&cmd.PullCMD{
 			RootCMD: &rcm,
 		}).Command(),
