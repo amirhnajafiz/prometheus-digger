@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,7 +28,7 @@ func (h *HealthCMD) Command() *cobra.Command {
 		Long:  "Check Prometheus server reachability and status",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := h.initVars(); err != nil {
-				panic(err)
+				log.Fatalf("init variables failed: %v\n", err)
 			}
 
 			h.main()
@@ -65,16 +64,16 @@ func (h *HealthCMD) main() {
 
 	hurl := fmt.Sprintf("%s/healthy", h.cfg.PrometheusURL)
 	if resp, err := http.Get(hurl); err != nil {
-		panic(err)
+		log.Fatalf("server error: %v\n", err)
 	} else if resp.StatusCode != http.StatusOK {
-		panic(errors.New("Prometheus returnes not OK!"))
+		log.Fatalf("server returned: %d\n", resp.StatusCode)
 	}
 
 	rurl := fmt.Sprintf("%s/ready", h.cfg.PrometheusURL)
 	if resp, err := http.Get(rurl); err != nil {
-		panic(err)
+		log.Fatalf("server ready error: %v\n", err)
 	} else if resp.StatusCode != http.StatusOK {
-		panic(errors.New("Prometheus returnes not Ready!"))
+		log.Fatalf("server ready returned: %d\n", resp.StatusCode)
 	}
 
 	log.Println("Prometheus is OK and Ready.")

@@ -1,6 +1,10 @@
 package main
 
-import "github.com/amirhnajafiz/prometheus-digger/internal/cmd"
+import (
+	"log"
+
+	"github.com/amirhnajafiz/prometheus-digger/internal/cmd"
+)
 
 func main() {
 	// create root command
@@ -25,6 +29,6 @@ func main() {
 
 	// execute the command
 	if err := root.Execute(); err != nil {
-		panic(err)
+		log.Fatalf("cmd failed: %v\n", err)
 	}
 }

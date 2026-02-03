@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 
@@ -26,7 +27,7 @@ func (c *ConfigCMD) Command() *cobra.Command {
 		Long:  "View the current configuration values",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := c.initVars(); err != nil {
-				panic(err)
+				log.Fatalf("init variables failed: %v\n", err)
 			}
 
 			c.main()

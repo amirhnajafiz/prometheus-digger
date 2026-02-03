@@ -38,7 +38,7 @@ func (p *PullCMD) Command() *cobra.Command {
 		Long:  "Pull records of a single Prometheus query",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := p.initVars(); err != nil {
-				panic(err)
+				log.Fatalf("init variables failed: %v\n", err)
 			}
 
 			p.main()
@@ -130,20 +130,20 @@ func (p *PullCMD) main() {
 		// call pull to fetch metrics with optimized request
 		response, err := promClient.Pull(start, end)
 		if err != nil {
-			panic(err)
+			log.Fatalf("failed reaching Prometheus: %v\n", err)
 		}
 
 		if p.RootCMD.JSONOut {
 			// call json export
 			if err := promClient.JSONExport(response); err != nil {
-				panic(err)
+				log.Fatalf("failed to export JSON: %v\n", err)
 			}
 		}
 		if p.RootCMD.CSVOut {
 			// convert to qqr
 			qqr, err := promClient.JSONToQRR(response)
 			if err != nil {
-				panic(err)
+				log.Fatalf("failed QQR convert: %v\n", err)
 			}
 
 			// extract extra labels
@@ -154,7 +154,7 @@ func (p *PullCMD) main() {
 
 			// export to csv
 			if err := promClient.CSVExport(qqr, labels...); err != nil {
-				panic(err)
+				log.Fatalf("failed to export CSV: %v\n", err)
 			}
 		}
 
