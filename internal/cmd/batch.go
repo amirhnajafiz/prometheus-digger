@@ -177,6 +177,7 @@ func (b *BatchCMD) main() {
 		}
 
 		log.Printf("query `%s` completed.\n", v)
+
 		cpool.PutClientObj(promClient)
 	}
 }

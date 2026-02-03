@@ -9,6 +9,9 @@ func main() {
 
 	// add sub-commands
 	root.AddCommand(
+		(&cmd.ConfigCMD{
+			RootCMD: &rcm,
+		}).Command(),
 		(&cmd.PullCMD{
 			RootCMD: &rcm,
 		}).Command(),
