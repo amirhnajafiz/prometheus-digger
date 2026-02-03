@@ -80,13 +80,13 @@ func (p *PullCMD) initVars() error {
 	if err != nil {
 		return fmt.Errorf("invalid time for start `%s`: %v", p.RootCMD.StartFlag, err)
 	}
-	p.queryStart = startDT
+	p.queryStart = startDT.UTC()
 
 	endDT, err := time.Parse(time.RFC3339, p.RootCMD.EndFlag)
 	if err != nil {
 		return fmt.Errorf("invalid time for end `%s`: %v", p.RootCMD.EndFlag, err)
 	}
-	p.queryEnd = endDT
+	p.queryEnd = endDT.UTC()
 
 	// check the from and to range
 	if startDT.After(endDT) {

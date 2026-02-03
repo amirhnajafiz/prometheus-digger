@@ -1,0 +1,8 @@
+{
+    "extra_csv_labels": true,
+    "esc": 1,
+    "request_timeout": 10,
+    "data_directory": "data",
+    "prometheus_url": "",
+    "step": "5s"
+}

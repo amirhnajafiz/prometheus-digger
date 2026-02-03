@@ -83,13 +83,13 @@ func (b *BatchCMD) initVars() error {
 	if err != nil {
 		return fmt.Errorf("invalid time for start `%s`: %v", b.RootCMD.StartFlag, err)
 	}
-	b.queryStart = startDT
+	b.queryStart = startDT.UTC()
 
 	endDT, err := time.Parse(time.RFC3339, b.RootCMD.EndFlag)
 	if err != nil {
 		return fmt.Errorf("invalid time for end `%s`: %v", b.RootCMD.EndFlag, err)
 	}
-	b.queryEnd = endDT
+	b.queryEnd = endDT.UTC()
 
 	// check the from and to range
 	if startDT.After(endDT) {
