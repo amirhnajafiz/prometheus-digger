@@ -19,7 +19,7 @@ func (r *RootCMD) Command() *cobra.Command {
 
 	command.
 		PersistentFlags().
-		StringVarP(&r.ConfigPath, "config-path", "c", "config.json", "path to a JSON configuration file")
+		StringVarP(&r.ConfigPath, "config-path", "c", "~/.promdigger/config.json", "path to a JSON configuration file")
 	command.
 		PersistentFlags().
 		StringVarP(&r.StartFlag, "start", "s", "2026-01-31T18:33:44-05:00", "query start time")

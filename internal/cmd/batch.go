@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"path"
 	"time"
 
@@ -53,8 +54,17 @@ func (b *BatchCMD) Command() *cobra.Command {
 }
 
 func (b *BatchCMD) initVars() error {
+	// set the config path
+	cfgPath := b.RootCMD.ConfigPath
+	if cfgPath == "~/.promdigger/config.json" {
+		home, err := os.UserHomeDir() // works across platforms
+		if err == nil {
+			cfgPath = path.Join(home, ".promdigger", "config.json")
+		}
+	}
+
 	// initialize the configuration
-	cfg, err := configs.LoadConfigs(b.RootCMD.ConfigPath)
+	cfg, err := configs.LoadConfigs(cfgPath)
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"path"
 	"time"
 
@@ -55,8 +56,17 @@ func (p *PullCMD) Command() *cobra.Command {
 }
 
 func (p *PullCMD) initVars() error {
+	// set the config path
+	cfgPath := p.RootCMD.ConfigPath
+	if cfgPath == "~/.promdigger/config.json" {
+		home, err := os.UserHomeDir() // works across platforms
+		if err == nil {
+			cfgPath = path.Join(home, ".promdigger", "config.json")
+		}
+	}
+
 	// initialize the configuration
-	cfg, err := configs.LoadConfigs(p.RootCMD.ConfigPath)
+	cfg, err := configs.LoadConfigs(cfgPath)
 	if err != nil {
 		return err
 	}
