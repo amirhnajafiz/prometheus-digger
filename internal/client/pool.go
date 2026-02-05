@@ -26,5 +26,5 @@ func (c *ClientObjectPool) GetClientObj() *Client {
 // PutClientObj puts back an unused client object.
 func (c *ClientObjectPool) PutClientObj(obj *Client) {
 	obj.reset()
-	c.pool.Put(c)
+	c.pool.Put(obj)
 }
