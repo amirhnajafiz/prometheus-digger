@@ -8,8 +8,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/datapoints"
-	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
+	"github.com/amirhnajafiz/promdigger/internal/datapoints"
+	"github.com/amirhnajafiz/promdigger/pkg/files"
 )
 
 const (

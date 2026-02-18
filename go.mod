@@ -1,4 +1,4 @@
-module github.com/amirhnajafiz/prometheus-digger
+module github.com/amirhnajafiz/promdigger
 
 go 1.25.5
 

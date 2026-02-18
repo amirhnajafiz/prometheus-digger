@@ -7,9 +7,9 @@ import (
 	"path"
 	"time"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/client"
-	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
-	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
+	"github.com/amirhnajafiz/promdigger/internal/client"
+	"github.com/amirhnajafiz/promdigger/internal/configs"
+	"github.com/amirhnajafiz/promdigger/pkg/files"
 
 	"github.com/spf13/cobra"
 )

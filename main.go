@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/cmd"
+	"github.com/amirhnajafiz/promdigger/internal/cmd"
 )
 
 func main() {

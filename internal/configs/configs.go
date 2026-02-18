@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/amirhnajafiz/prometheus-digger/pkg/files"
+	"github.com/amirhnajafiz/promdigger/pkg/files"
 )
 
 // Config holds the configuration of the the digger.

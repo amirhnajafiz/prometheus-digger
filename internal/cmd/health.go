@@ -7,7 +7,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/amirhnajafiz/prometheus-digger/internal/configs"
+	"github.com/amirhnajafiz/promdigger/internal/configs"
+
 	"github.com/spf13/cobra"
 )
 
