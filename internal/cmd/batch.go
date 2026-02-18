@@ -24,6 +24,7 @@ type BatchCMD struct {
 	inputPath string
 	batch     *models.Batch
 	cfg       *configs.Config
+	cpool     *client.ClientObjectPool
 
 	// query fields
 	queryStep  time.Duration
@@ -112,17 +113,18 @@ func (b *BatchCMD) initVars() error {
 		return err
 	}
 
+	// create a new client object pool
+	b.cpool = client.NewObjectPool()
+
 	return nil
 }
 
 func (b *BatchCMD) main() {
-	cpool := client.NewObjectPool()
-
 	for k, v := range b.batch.Records {
 		log.Printf("query `%s` start.\n", v)
 
 		// create a client instance
-		promClient := cpool.GetClientObj()
+		promClient := b.cpool.GetClientObj()
 
 		promClient.Series = b.cfg.EstimatedSeriesCount
 		promClient.Timeout = b.cfg.RequestTimeout
@@ -178,6 +180,6 @@ func (b *BatchCMD) main() {
 
 		log.Printf("query `%s` completed.\n", v)
 
-		cpool.PutClientObj(promClient)
+		b.cpool.PutClientObj(promClient)
 	}
 }
