@@ -6,8 +6,7 @@ Promdigger (Prometheus Digger) is a Go-based CLI tool for executing PromQL queri
 
 * Execute large-scale PromQL queries efficiently
 * Automatically optimize query execution based on query range and size
-* Concurrent query processing for improved performance
-* Batched query execution
+* Batched query execution for improved performance
 * Export query results to CSV format
 
 ## Installation
